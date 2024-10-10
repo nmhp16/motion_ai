@@ -1,5 +1,7 @@
 package com.instructor.evaluation;
 
+import java.util.Map;
+
 public class PoseProcessing {
 	
 	public Map<String, float[]> normalizeKeypoints(Map<String, Map<Integer, float[]>> keypoints) {

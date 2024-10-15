@@ -2,10 +2,7 @@ package com.instructor.main;
 
 import com.instructor.data.*;
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
 
 public class PoseEstimationStarter {
 
@@ -33,20 +30,19 @@ public class PoseEstimationStarter {
             // Wait for the process to finish
             int exitCode = process.waitFor();
             System.out.println("Python script exited with code: " + exitCode);
-            
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    
 
     public static void main(String[] args) {
         // Create the entry point for communication
         PoseEstimationStarter handler = new PoseEstimationStarter();
-        
+
         System.out.println("Starting video capture from Python...");
         handler.runPythonScript();
-        
+
         // Instantiate PoseDataReader and call displayPoseData()
         PoseDataReader poseDataReader = new PoseDataReader();
         poseDataReader.displayPoseData("keypoints_data.txt");

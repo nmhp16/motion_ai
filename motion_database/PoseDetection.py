@@ -135,9 +135,8 @@ class PoseEstimationService:
         plt.legend()
         plt.tight_layout()
         plt.savefig('keypoints_coordinates_distance_plot.png')  # Save the plot
-        plt.show()
+        plt.show() # Replace with plt.close() if does not want to display the plot
 
-# TODO: ADD VIDEO PATH OF PRO DANCER TO COLLECT DATA
 # Start the video capture from a video file
 video_file_path = 'path_to_your_video_file.mp4'  # Specify the video file path
 pose_service = PoseEstimationService(video_file_path)

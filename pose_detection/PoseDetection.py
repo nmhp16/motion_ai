@@ -134,7 +134,7 @@ class PoseEstimationService:
         plt.legend()
         plt.tight_layout()
         plt.savefig('keypoints_coordinates_distance_plot.png')  # Save the plot
-        plt.show()
+        plt.show() # Replace with plt.close() if does not want to display the plot
 
 
 # Start the video capture in Python

@@ -3,6 +3,8 @@ package com.instructor.main;
 import com.instructor.data.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PoseEstimationStarter {
 
@@ -37,14 +39,25 @@ public class PoseEstimationStarter {
     }
 
     public static void main(String[] args) {
+        // Instantiate PoseDataReader
+        PoseDataReader poseDataReader = new PoseDataReader();
+
+        // Instantiate Hashmap to store user key points
+        // Map <Keypoints (ex: left_leg), Map<Frame (ex: 1), coordinates (x,y,z)>>
+        Map<String, Map<Integer, float[]>> userKeypointsMap = new HashMap<>();
+
         // Create the entry point for communication
         PoseEstimationStarter handler = new PoseEstimationStarter();
 
+        // Start video to capture user dance, and generate a .txt file
         System.out.println("Starting video capture from Python...");
         handler.runPythonScript();
 
-        // Instantiate PoseDataReader and call displayPoseData()
-        PoseDataReader poseDataReader = new PoseDataReader();
-        poseDataReader.displayPoseData("keypoints_data.txt");
+        // Read this .txt file to populate userKeypoints
+        userKeypointsMap = poseDataReader.readKeypointsFromFile("keypoints_data.txt");
+
+        // TODO: Remove later, keep for test purposes
+        poseDataReader.displayPoseData(userKeypointsMap); // Display pose coordinates
+
     }
 }

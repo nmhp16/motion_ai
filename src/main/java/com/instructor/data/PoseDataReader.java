@@ -64,11 +64,10 @@ public class PoseDataReader {
         return keypointsMap;
     }
 
-    // TODO: Remove this later, keep for test purposes only
     // Method to display pose keypoints data by reading from a file
-    public void displayPoseData(String filePath) {
+    public void displayPoseData(Map<String, Map<Integer, float[]>> userKeypointsMap) {
         // Read the keypoints data from the file
-        Map<String, Map<Integer, float[]>> keypointsData = readKeypointsFromFile(filePath);
+        Map<String, Map<Integer, float[]>> keypointsData = userKeypointsMap;
         System.out.println("Received Pose Data:");
 
         // Iterate through the keypoints and display their frame data

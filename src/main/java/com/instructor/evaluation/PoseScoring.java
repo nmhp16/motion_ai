@@ -10,9 +10,14 @@ public class PoseScoring {
 	 * @return
 	 */
 	public int calculateScore(float similarityScore, float maxSimilarity) {
-		// Normalize the similarity score to be out of 100
-		// Low similarity score means the user's pose is very similar to professional
-		// dancer's pose
-		return (int) Math.max(0, 100 - (similarityScore / maxSimilarity) * 100);
+		// Cap the similarity score to avoid exceeding maxSimilarity
+		similarityScore = Math.min(similarityScore, maxSimilarity);
+
+		// Normalize the similarity score on a scale of 0-1
+		float normalizedSimilarity = similarityScore / maxSimilarity;
+
+		// Calculate final score (out of 100) - lower normalized similarity gives higher
+		// score
+		return (int) Math.max(0, (1 - normalizedSimilarity) * 100);
 	}
 }

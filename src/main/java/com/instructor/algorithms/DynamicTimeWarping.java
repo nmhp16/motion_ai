@@ -16,6 +16,8 @@ public class DynamicTimeWarping {
      */
     public static float dtw(Map<String, Map<Integer, float[]>> userKeypoints,
             Map<String, Map<Integer, float[]>> proKeypoints) {
+        PoseDataProcessing poseDataProcessing = new PoseDataProcessing();
+
         int n = userKeypoints.get("shoulder_left").size(); // Number of frames in user pose sequence
         int m = proKeypoints.get("shoulder_left").size(); // Number of frames in pro pose sequence
 
@@ -34,7 +36,7 @@ public class DynamicTimeWarping {
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= m; j++) {
                 // Use the similarity between frames
-                float cost = PoseDataProcessing.calculateSimilarity(userKeypoints, proKeypoints);
+                float cost = poseDataProcessing.calculateSimilarity(userKeypoints, proKeypoints);
                 dtwMatrix[i][j] = cost
                         + Math.min(Math.min(dtwMatrix[i - 1][j], dtwMatrix[i][j - 1]), dtwMatrix[i - 1][j - 1]);
             }

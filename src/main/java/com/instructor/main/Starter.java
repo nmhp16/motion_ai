@@ -1,6 +1,8 @@
 package com.instructor.main;
 
 import com.instructor.data.*;
+import com.instructor.evaluation.PoseScoring;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -8,7 +10,9 @@ import java.util.Map;
 
 public class Starter {
 
-    // Method to run the Python script
+    /**
+     * Method to run the Python script
+     */
     private void runPythonScript() {
         try {
             // Define the command to run the Python script
@@ -38,32 +42,55 @@ public class Starter {
         }
     }
 
+    /**
+     * Main
+     * 
+     * @param args
+     */
     public static void main(String[] args) {
-        // Instantiate PoseDataReader
+        // Instantiate PoseDataReader and PoseDataProcessing and Pose Scoring
         PoseDataReader poseDataReader = new PoseDataReader();
+        PoseDataProcessing poseDataProcessing = new PoseDataProcessing();
+        PoseScoring poseScoring = new PoseScoring();
 
         // Map <Keypoints (ex: left_leg), Map<Frame (ex: 1), coordinates (x,y,z)>>
         // Instantiate Hashmap to store user key points
         Map<String, Map<Integer, float[]>> userKeypointsMap = new HashMap<>();
+        Map<String, Map<Integer, float[]>> proKeypointsMap = new HashMap<>();
 
         // Create the entry point for communication
         Starter handler = new Starter();
 
+        // TODO: Remove // Once done testing
         // Start video to capture user dance, and generate a .txt file
-        System.out.println("Starting video capture from Python...");
-        handler.runPythonScript();
+        // System.out.println("Starting video capture from Python...");
+        // handler.runPythonScript();
 
+        // TODO: Remove // Once done testing
         // Read this .txt file to populate userKeypoints
-        userKeypointsMap = poseDataReader.readKeypointsFromFile("keypoints_data.txt");
+        // userKeypointsMap = poseDataReader.readKeypointsFromFile("userKeypoints.txt");
+        userKeypointsMap = poseDataReader
+                .readKeypointsFromFile("./motion_database/ballet_spin/beginner_ballet_spin.txt");
+        proKeypointsMap = poseDataReader.readKeypointsFromFile("./motion_database/ballet_spin/pro_ballet_spin.txt");
 
-        // TODO: REMOVE LATER, KEEP FOR TEST PURPOSES
-        poseDataReader.displayPoseData(userKeypointsMap); // Display pose coordinates
+        // Normalize the keypoints for both user and pro
+        Map<String, Map<Integer, float[]>> normalizedUserKeypoints = poseDataProcessing
+                .normalizeKeypoints(userKeypointsMap);
+        Map<String, Map<Integer, float[]>> normalizedProKeypoints = poseDataProcessing
+                .normalizeKeypoints(proKeypointsMap);
 
-        // TODO: READ PROFESSIONAL DANCER KEYPOINTS FROM .TXT FILE PUT INTO A LIST MAP
+        // Calculate similarity score between user and pro
+        float similarityScore = poseDataProcessing.calculateSimilarity(normalizedUserKeypoints, normalizedProKeypoints);
 
-        // TODO: POSE DATA PROCESSING FOR BOTH USER AND PROS
+        // Assume max similarity
+        float maxSimilarity = 3.0f; // Replace with actual value
 
-        // TODO: COMPARE SIMILARITY
+        // Calculate final score
+        int finalScore = poseScoring.calculateScore(similarityScore, maxSimilarity);
+
+        // Output similarity score and final score
+        System.out.println("Similarity Score: " + similarityScore);
+        System.out.println("Final Score (out of 100): " + finalScore);
 
     }
 }

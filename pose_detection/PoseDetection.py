@@ -107,14 +107,14 @@ class PoseEstimationService:
 
     def save_keypoints_data(self):
         # Save the keypoints data to a .txt file
-        with open('keypoints_data.txt', 'w') as f:
+        with open('userKeypoints.txt', 'w') as f:
             for keypoint, positions in self.keypoints_data.items():
                 if positions:
                     f.write(f"{keypoint}:\n")
                     for pos in positions:
                         f.write(f"  Frame {pos[0]}: x={pos[1]:.4f}, y={pos[2]:.4f}, z={pos[3]:.4f}\n")
                     f.write("\n")
-        print("Keypoints data saved to keypoints_data.txt")
+        print("Keypoints data saved to userKeypoints.txt")
 
     def plot_keypoints_with_distance(self):
         plt.figure(figsize=(12, 6))
@@ -133,7 +133,7 @@ class PoseEstimationService:
         plt.grid()
         plt.legend()
         plt.tight_layout()
-        plt.savefig('keypoints_coordinates_distance_plot.png')  # Save the plot
+        plt.savefig('user_plot.png')  # Save the plot
         plt.show() # Replace with plt.close() if does not want to display the plot
 
 

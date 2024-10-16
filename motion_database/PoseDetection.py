@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 # Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
-
+mp_drawing = mp.solutions.drawing_utils
 
 class PoseEstimationService:
     def __init__(self, video_path):
@@ -16,33 +16,21 @@ class PoseEstimationService:
 
     def initialize_keypoints_data(self):
         return {
-            "nose": [],
-            "left_eye": [],
-            "right_eye": [],
-            "left_ear": [],
-            "right_ear": [],
-            "shoulder_left": [],
-            "shoulder_right": [],
-            "elbow_left": [],
-            "elbow_right": [],
-            "wrist_left": [],
-            "wrist_right": [],
-            "hip_left": [],
-            "hip_right": [],
-            "knee_left": [],
-            "knee_right": [],
-            "ankle_left": [],
-            "ankle_right": []
+            "nose": [], "left_eye": [], "right_eye": [], "left_ear": [], "right_ear": [],
+            "shoulder_left": [], "shoulder_right": [], "elbow_left": [], "elbow_right": [],
+            "wrist_left": [], "wrist_right": [], "hip_left": [], "hip_right": [],
+            "knee_left": [], "knee_right": [], "ankle_left": [], "ankle_right": []
         }
 
     def start_video_capture(self):
-        cap = cv2.VideoCapture(self.video_path)  # Use video file path instead of webcam
+        cap = cv2.VideoCapture(self.video_path)
+
         frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        # Define the codec and create VideoWriter object
+        # Define the codec and create VideoWriter object for keypoints-only video
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        out = cv2.VideoWriter('output_video.avi', fourcc, 20.0, (frame_width, frame_height))
+        out = cv2.VideoWriter('keypoints_line_video.avi', fourcc, 20.0, (frame_width, frame_height))
 
         while cap.isOpened():
             ret, frame = cap.read()
@@ -50,6 +38,8 @@ class PoseEstimationService:
                 print("End of video or failed to read frame.")
                 break
 
+            # Create a blank frame for drawing keypoints
+            blank_frame = np.zeros((frame_height, frame_width, 3), dtype=np.uint8)
             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image.flags.writeable = False
 
@@ -57,15 +47,21 @@ class PoseEstimationService:
             results = self.pose.process(image)
 
             if results.pose_landmarks:
-                # Draw pose landmarks on the image
-                mp.solutions.drawing_utils.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+                # Draw keypoints and connections on the blank frame (keypoints only, no original frame)
+                mp_drawing.draw_landmarks(
+                    blank_frame, 
+                    results.pose_landmarks, 
+                    mp_pose.POSE_CONNECTIONS,
+                    mp_drawing.DrawingSpec(color=(255, 255, 255), thickness=2, circle_radius=2),  # Keypoints
+                    mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2)  # Connections
+                )
                 self.extract_pose_keypoints(results.pose_landmarks.landmark)
 
-            # Write the frame to the output video file
-            out.write(frame)
+            # Write the keypoints frame (blank_frame) to the output video file
+            out.write(blank_frame)
 
-            # Display the frame
-            cv2.imshow('Pose Estimation', frame)
+            # Display the keypoints-only frame
+            cv2.imshow('Keypoints Line Video', blank_frame)
 
             if cv2.waitKey(5) & 0xFF == 27:  # Press 'ESC' to exit
                 break
@@ -135,10 +131,10 @@ class PoseEstimationService:
         plt.legend()
         plt.tight_layout()
         plt.savefig('keypoints_coordinates_distance_plot.png')  # Save the plot
-        plt.show() # Replace with plt.close() if does not want to display the plot
+        plt.show()  # Replace with plt.close() if you don't want to display the plot
 
 # Start the video capture from a video file
-video_file_path = 'path_to_your_video_file.mp4'  # Specify the video file path
+video_file_path = 'motion_database/Beginner.mp4'  # Specify the video file path
 pose_service = PoseEstimationService(video_file_path)
 
 # Start processing the video file

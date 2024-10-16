@@ -7,11 +7,15 @@ import java.util.Map;
 
 public class PoseDataReader {
 
-    // Method to read keypoints data from a text file, takes a file path as an
-    // argument
-    // and returns a Map where the key is the keypoint name, and the value is
-    // another Map
-    // that stores frame numbers and their corresponding x,y,z coordinates
+    /**
+     * Method to read keypoints data from a text file, takes a file path as an
+     * argument
+     * Stores frame numbers and their corresponding x,y,z coordinates
+     * 
+     * @param filePath Text file that contains user keypoints data
+     * @return Map where the key is the keypoint name, and the value is another Map
+     *         of frame value and coordinates
+     */
     public Map<String, Map<Integer, float[]>> readKeypointsFromFile(String filePath) {
         // The outer Map holds keypoint names as keys and a Map of frame data as values
         Map<String, Map<Integer, float[]>> keypointsMap = new HashMap<>();
@@ -64,7 +68,13 @@ public class PoseDataReader {
         return keypointsMap;
     }
 
-    // Method to display pose keypoints data by reading from a file
+    /**
+     * Method to display pose keypoints data by reading from a file and display all
+     * value
+     * 
+     * @param userKeypointsMap Map contain all information about user keypoints,
+     *                         frame, coordinates
+     */
     public void displayPoseData(Map<String, Map<Integer, float[]>> userKeypointsMap) {
         // Read the keypoints data from the file
         Map<String, Map<Integer, float[]>> keypointsData = userKeypointsMap;

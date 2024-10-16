@@ -1,13 +1,19 @@
 package com.instructor.algorithms;
 
-import com.instructor.evaluation.PoseProcessing;
-
 import java.util.Map;
+
+import com.instructor.data.PoseDataProcessing;
 
 // TODO: COMPLETE TEST CODE FOR DYNAMIC WARPING WHICH ACCOUNTS FOR FRAME DIFFERENCES
 public class DynamicTimeWarping {
 
-    // Calculate the DTW distance between 2 sequences of keypoints
+    /**
+     * Calculate the DTW distance between 2 sequences of keypoints
+     * 
+     * @param userKeypoints
+     * @param proKeypoints
+     * @return
+     */
     public static float dtw(Map<String, Map<Integer, float[]>> userKeypoints,
             Map<String, Map<Integer, float[]>> proKeypoints) {
         int n = userKeypoints.get("shoulder_left").size(); // Number of frames in user pose sequence
@@ -28,7 +34,7 @@ public class DynamicTimeWarping {
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= m; j++) {
                 // Use the similarity between frames
-                float cost = PoseProcessing.calculateSimilarity(userKeypoints, proKeypoints);
+                float cost = PoseDataProcessing.calculateSimilarity(userKeypoints, proKeypoints);
                 dtwMatrix[i][j] = cost
                         + Math.min(Math.min(dtwMatrix[i - 1][j], dtwMatrix[i][j - 1]), dtwMatrix[i - 1][j - 1]);
             }

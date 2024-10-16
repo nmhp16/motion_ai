@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PoseEstimationStarter {
+public class Starter {
 
     // Method to run the Python script
     private void runPythonScript() {
@@ -42,12 +42,12 @@ public class PoseEstimationStarter {
         // Instantiate PoseDataReader
         PoseDataReader poseDataReader = new PoseDataReader();
 
-        // Instantiate Hashmap to store user key points
         // Map <Keypoints (ex: left_leg), Map<Frame (ex: 1), coordinates (x,y,z)>>
+        // Instantiate Hashmap to store user key points
         Map<String, Map<Integer, float[]>> userKeypointsMap = new HashMap<>();
 
         // Create the entry point for communication
-        PoseEstimationStarter handler = new PoseEstimationStarter();
+        Starter handler = new Starter();
 
         // Start video to capture user dance, and generate a .txt file
         System.out.println("Starting video capture from Python...");
@@ -56,8 +56,14 @@ public class PoseEstimationStarter {
         // Read this .txt file to populate userKeypoints
         userKeypointsMap = poseDataReader.readKeypointsFromFile("keypoints_data.txt");
 
-        // TODO: Remove later, keep for test purposes
+        // TODO: REMOVE LATER, KEEP FOR TEST PURPOSES
         poseDataReader.displayPoseData(userKeypointsMap); // Display pose coordinates
+
+        // TODO: READ PROFESSIONAL DANCER KEYPOINTS FROM .TXT FILE PUT INTO A LIST MAP
+
+        // TODO: POSE DATA PROCESSING FOR BOTH USER AND PROS
+
+        // TODO: COMPARE SIMILARITY
 
     }
 }

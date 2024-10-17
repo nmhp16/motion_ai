@@ -69,10 +69,10 @@ public class Starter {
         // TODO: Remove // Once done testing
         // Read this .txt file to populate userKeypoints
         // userKeypointsMap = poseDataReader.readKeypointsFromFile("userKeypoints.txt");
-        
+
         userKeypointsMap = poseDataReader
-                .readKeypointsFromFile("./motion_database/ballet_spin/beginner_ballet_spin.txt");
-        proKeypointsMap = poseDataReader.readKeypointsFromFile("./motion_database/ballet_spin/pro_ballet_spin.txt");
+                .readKeypointsFromFile("./motion_database/ballet_spin/beginner.txt");
+        proKeypointsMap = poseDataReader.readKeypointsFromFile("./motion_database/ballet_spin/pro.txt");
 
         // Normalize the keypoints for both user and pro
         Map<String, Map<Integer, float[]>> normalizedUserKeypoints = poseDataProcessing
@@ -92,6 +92,10 @@ public class Starter {
         // Output similarity score and final score
         System.out.println("Similarity Score: " + similarityScore);
         System.out.println("Final Score (out of 100): " + finalScore);
+
+        // TODO: Calculate DTW Score
+
+        // TODO: Decision Tree for classification
 
     }
 }

@@ -4,5 +4,7 @@
 - (`pose_detection`) is used to collect user data by video capture when running Java application.
 
 # MediaPipe Keypoints
-![Uploading MediaPipes-33-key-points-29.png…]()
+![MediaPipes-33-key-points-29-1](https://github.com/user-attachments/assets/a61fac5e-3127-4d5b-ad49-0227656b3ee6)
+
+
 

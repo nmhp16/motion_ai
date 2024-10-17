@@ -69,6 +69,7 @@ public class Starter {
         // TODO: Remove // Once done testing
         // Read this .txt file to populate userKeypoints
         // userKeypointsMap = poseDataReader.readKeypointsFromFile("userKeypoints.txt");
+        
         userKeypointsMap = poseDataReader
                 .readKeypointsFromFile("./motion_database/ballet_spin/beginner_ballet_spin.txt");
         proKeypointsMap = poseDataReader.readKeypointsFromFile("./motion_database/ballet_spin/pro_ballet_spin.txt");

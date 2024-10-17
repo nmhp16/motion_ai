@@ -3,13 +3,15 @@ import mediapipe as mp
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Initialize MediaPipe Pose
+# Initialize MediaPipe Pose and Hands
 mp_pose = mp.solutions.pose
+mp_hands = mp.solutions.hands
 
 
 class PoseEstimationService:
     def __init__(self):
         self.pose = mp_pose.Pose()
+        self.hands = mp_hands.Hands()
         self.keypoints_data = self.initialize_keypoints_data()
         self.frame_counter = 0
 
@@ -32,6 +34,12 @@ class PoseEstimationService:
             "knee_right": [],
             "ankle_left": [],
             "ankle_right": [],
+            "heel_left": [],
+            "heel_right": [],
+            "foot_index_left": [],
+            "foot_index_right": [],
+            "left_index_finger_tip": [], "right_index_finger_tip": [],
+            "left_thumb_tip": [], "right_thumb_tip": []
         }
 
     def start_video_capture(self):
@@ -54,11 +62,18 @@ class PoseEstimationService:
 
             # Pose detection
             results = self.pose.process(image)
+            # Hand detection
+            hand_results = self.hands.process(image)
 
             if results.pose_landmarks:
                 # Draw pose landmarks on the image
                 mp.solutions.drawing_utils.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
                 self.extract_pose_keypoints(results.pose_landmarks.landmark)
+
+            if hand_results.multi_hand_landmarks:
+                for hand_landmarks in hand_results.multi_hand_landmarks:
+                    mp.solutions.drawing_utils.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+                    self.extract_hand_keypoints(hand_landmarks.landmark)
 
             # Write the frame to the output video file
             out.write(frame)
@@ -100,10 +115,25 @@ class PoseEstimationService:
                 mp_pose.PoseLandmark.RIGHT_KNEE.value: "knee_right",
                 mp_pose.PoseLandmark.LEFT_ANKLE.value: "ankle_left",
                 mp_pose.PoseLandmark.RIGHT_ANKLE.value: "ankle_right"
+                mp_pose.PoseLandmark.LEFT_HEEL.value: "heel_left",
+            	mp_pose.PoseLandmark.RIGHT_HEEL.value: "heel_right",
+            	mp_pose.PoseLandmark.LEFT_FOOT_INDEX.value: "foot_index_left",
+            	mp_pose.PoseLandmark.RIGHT_FOOT_INDEX.value: "foot_index_right"
             }
 
             if idx in keypoint_map:
                 self.keypoints_data[keypoint_map[idx]].append([self.frame_counter, landmark.x, landmark.y, landmark.z])
+
+    def extract_hand_keypoints(self, hand_landmarks):
+        # Extract index and thumb fingertips
+        self.keypoints_data["left_index_finger_tip"].append(
+            [self.frame_counter, hand_landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP].x,
+             hand_landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP].y, 0]
+        )
+        self.keypoints_data["left_thumb_tip"].append(
+            [self.frame_counter, hand_landmarks[mp_hands.HandLandmark.THUMB_TIP].x,
+             hand_landmarks[mp_hands.HandLandmark.THUMB_TIP].y, 0]
+        )
 
     def save_keypoints_data(self):
         # Save the keypoints data to a .txt file

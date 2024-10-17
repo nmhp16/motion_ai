@@ -3,13 +3,15 @@ import mediapipe as mp
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Initialize MediaPipe Pose
+# Initialize MediaPipe Pose and Hands
 mp_pose = mp.solutions.pose
+mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
 
 class PoseEstimationService:
     def __init__(self, video_path):
         self.pose = mp_pose.Pose()
+        self.hands = mp_hands.Hands()
         self.keypoints_data = self.initialize_keypoints_data()
         self.frame_counter = 0
         self.video_path = video_path
@@ -19,7 +21,10 @@ class PoseEstimationService:
             "nose": [], "left_eye": [], "right_eye": [], "left_ear": [], "right_ear": [],
             "shoulder_left": [], "shoulder_right": [], "elbow_left": [], "elbow_right": [],
             "wrist_left": [], "wrist_right": [], "hip_left": [], "hip_right": [],
-            "knee_left": [], "knee_right": [], "ankle_left": [], "ankle_right": []
+            "knee_left": [], "knee_right": [], "ankle_left": [], "ankle_right": [],
+            "heel_left": [], "heel_right": [], "foot_index_left": [], "foot_index_right": [],
+            "left_index_finger_tip": [], "right_index_finger_tip": [],
+            "left_thumb_tip": [], "right_thumb_tip": []
         }
 
     def start_video_capture(self):
@@ -44,18 +49,29 @@ class PoseEstimationService:
             image.flags.writeable = False
 
             # Pose detection
-            results = self.pose.process(image)
+            pose_results = self.pose.process(image)
+            # Hand detection
+            hand_results = self.hands.process(image)
 
-            if results.pose_landmarks:
+            if pose_results.pose_landmarks:
                 # Draw keypoints and connections on the blank frame (keypoints only, no original frame)
                 mp_drawing.draw_landmarks(
                     blank_frame, 
-                    results.pose_landmarks, 
+                    pose_results.pose_landmarks, 
                     mp_pose.POSE_CONNECTIONS,
                     mp_drawing.DrawingSpec(color=(255, 255, 255), thickness=2, circle_radius=2),  # Keypoints
                     mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2)  # Connections
                 )
-                self.extract_pose_keypoints(results.pose_landmarks.landmark)
+                self.extract_pose_keypoints(pose_results.pose_landmarks.landmark)
+
+            if hand_results.multi_hand_landmarks:
+                for hand_landmarks in hand_results.multi_hand_landmarks:
+                    mp_drawing.draw_landmarks(
+                        blank_frame, hand_landmarks, mp_hands.HAND_CONNECTIONS,
+                        mp_drawing.DrawingSpec(color=(255, 255, 255), thickness=2, circle_radius=2),
+                        mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2)
+                    )
+                    self.extract_hand_keypoints(hand_landmarks.landmark)
 
             # Write the keypoints frame (blank_frame) to the output video file
             out.write(blank_frame)
@@ -77,33 +93,45 @@ class PoseEstimationService:
         self.plot_keypoints_with_distance()  # Call the plot function after capturing
 
     def extract_pose_keypoints(self, landmarks):
+        keypoint_map = {
+            mp_pose.PoseLandmark.NOSE.value: "nose",
+            mp_pose.PoseLandmark.LEFT_EYE.value: "left_eye",
+            mp_pose.PoseLandmark.RIGHT_EYE.value: "right_eye",
+            mp_pose.PoseLandmark.LEFT_EAR.value: "left_ear",
+            mp_pose.PoseLandmark.RIGHT_EAR.value: "right_ear",
+            mp_pose.PoseLandmark.LEFT_SHOULDER.value: "shoulder_left",
+            mp_pose.PoseLandmark.RIGHT_SHOULDER.value: "shoulder_right",
+            mp_pose.PoseLandmark.LEFT_ELBOW.value: "elbow_left",
+            mp_pose.PoseLandmark.RIGHT_ELBOW.value: "elbow_right",
+            mp_pose.PoseLandmark.LEFT_WRIST.value: "wrist_left",
+            mp_pose.PoseLandmark.RIGHT_WRIST.value: "wrist_right",
+            mp_pose.PoseLandmark.LEFT_HIP.value: "hip_left",
+            mp_pose.PoseLandmark.RIGHT_HIP.value: "hip_right",
+            mp_pose.PoseLandmark.LEFT_KNEE.value: "knee_left",
+            mp_pose.PoseLandmark.RIGHT_KNEE.value: "knee_right",
+            mp_pose.PoseLandmark.LEFT_ANKLE.value: "ankle_left",
+            mp_pose.PoseLandmark.RIGHT_ANKLE.value: "ankle_right",
+            mp_pose.PoseLandmark.LEFT_HEEL.value: "heel_left",
+            mp_pose.PoseLandmark.RIGHT_HEEL.value: "heel_right",
+            mp_pose.PoseLandmark.LEFT_FOOT_INDEX.value: "foot_index_left",
+            mp_pose.PoseLandmark.RIGHT_FOOT_INDEX.value: "foot_index_right"
+        }
         for idx, landmark in enumerate(landmarks):
-            # Map the index to body parts
-            keypoint_map = {
-                mp_pose.PoseLandmark.NOSE.value: "nose",
-                mp_pose.PoseLandmark.LEFT_EYE.value: "left_eye",
-                mp_pose.PoseLandmark.RIGHT_EYE.value: "right_eye",
-                mp_pose.PoseLandmark.LEFT_EAR.value: "left_ear",
-                mp_pose.PoseLandmark.RIGHT_EAR.value: "right_ear",
-                mp_pose.PoseLandmark.LEFT_SHOULDER.value: "shoulder_left",
-                mp_pose.PoseLandmark.RIGHT_SHOULDER.value: "shoulder_right",
-                mp_pose.PoseLandmark.LEFT_ELBOW.value: "elbow_left",
-                mp_pose.PoseLandmark.RIGHT_ELBOW.value: "elbow_right",
-                mp_pose.PoseLandmark.LEFT_WRIST.value: "wrist_left",
-                mp_pose.PoseLandmark.RIGHT_WRIST.value: "wrist_right",
-                mp_pose.PoseLandmark.LEFT_HIP.value: "hip_left",
-                mp_pose.PoseLandmark.RIGHT_HIP.value: "hip_right",
-                mp_pose.PoseLandmark.LEFT_KNEE.value: "knee_left",
-                mp_pose.PoseLandmark.RIGHT_KNEE.value: "knee_right",
-                mp_pose.PoseLandmark.LEFT_ANKLE.value: "ankle_left",
-                mp_pose.PoseLandmark.RIGHT_ANKLE.value: "ankle_right"
-            }
-
             if idx in keypoint_map:
                 self.keypoints_data[keypoint_map[idx]].append([self.frame_counter, landmark.x, landmark.y, landmark.z])
 
+    def extract_hand_keypoints(self, hand_landmarks):
+        # Extract index and thumb fingertips
+        self.keypoints_data["left_index_finger_tip"].append(
+            [self.frame_counter, hand_landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP].x,
+             hand_landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP].y, 0]
+        )
+        self.keypoints_data["left_thumb_tip"].append(
+            [self.frame_counter, hand_landmarks[mp_hands.HandLandmark.THUMB_TIP].x,
+             hand_landmarks[mp_hands.HandLandmark.THUMB_TIP].y, 0]
+        )
+
     def save_keypoints_data(self):
-        # Save the keypoints data to a .txt file
         with open('keypoints_data.txt', 'w') as f:
             for keypoint, positions in self.keypoints_data.items():
                 if positions:
@@ -130,12 +158,11 @@ class PoseEstimationService:
         plt.grid()
         plt.legend()
         plt.tight_layout()
-        plt.savefig('keypoints_coordinates_distance_plot.png')  # Save the plot
-        plt.show()  # Replace with plt.close() if you don't want to display the plot
+        plt.savefig('keypoints_coordinates_distance_plot.png')
+        plt.show()
 
 # Start the video capture from a video file
-video_file_path = 'motion_database/Beginner.mp4'  # Specify the video file path
+video_file_path = 'motion_database/Beginner.mp4'
 pose_service = PoseEstimationService(video_file_path)
 
-# Start processing the video file
 pose_service.start_video_capture()

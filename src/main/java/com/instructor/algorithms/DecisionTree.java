@@ -30,5 +30,7 @@ public class DecisionTree {
 		// Add angles for each relevant joint
 		
 		// Add distances between keypoints
+		
+		// Add class label (correct or incorrect pose)
 	}
 }

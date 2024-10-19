@@ -5,20 +5,24 @@
 - Run (`Starter.java`) to start the Java application.
 
 ## Packages
--  **com.instructor.algorithms**
-  - MergeSort
-  - DecisionTree
-    - Train with Weka 
-  - DynamicTimeWarping
-    - Account for frame difference
--  **com.instructor.data**
-  - PoseDataReader
-  - PoseDataProcessing
--  **com.instructor.evaluation**
-  - PoseFeedback
-  - PoseScoring
+
+- **com.instructor.algorithms**
+  - **MergeSort**: Implements the Merge Sort algorithm to efficiently sort user performance or ranking.
+  - **DecisionTree**: 
+    - Utilizes Weka for training a decision tree model, enabling classification of dance poses based on keypoint data.
+  - **DynamicTimeWarping**: 
+    - Accounts for differences in frame rates and timing between user and professional poses, facilitating accurate comparison.
+
+- **com.instructor.data**
+  - **PoseDataReader**: Responsible for reading and importing pose keypoint data from video files into the system.
+  - **PoseDataProcessing**: Processes the imported keypoint data to normalize and prepare it for evaluation.
+
+- **com.instructor.evaluation**
+  - **PoseFeedback**: Provides real-time feedback to users based on their pose accuracy compared to the professional dancer's poses.
+  - **PoseScoring**: Implements algorithms to calculate a similarity score between user poses and reference poses, aiding in performance assessment.
+
 - **com.instructor.main**
-  - Starter
+  - **Starter**: The main entry point of the application, initializing components and starting the pose estimation and evaluation process.
 
 # MediaPipe Keypoints
 ![MediaPipes-33-key-points-29-1](https://github.com/user-attachments/assets/a61fac5e-3127-4d5b-ad49-0227656b3ee6)

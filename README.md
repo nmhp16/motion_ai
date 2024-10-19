@@ -6,22 +6,22 @@
 
 # Current Packages
 
-## **com.instructor.algorithms**
+- ## **com.instructor.algorithms**
   - **MergeSort**: Implements the Merge Sort algorithm to efficiently sort user performance or rankings.
   - **DecisionTree**: 
     - Utilizes Weka for training a decision tree model to classify dance poses based on keypoint data.
   - **DynamicTimeWarping**: 
     - Accounts for differences in frame rates and timing between user and professional poses, facilitating accurate comparisons.
 
-## **com.instructor.data**
+- ## **com.instructor.data**
   - **PoseDataReader**: Responsible for reading and importing pose keypoint data from video files into the system.
   - **PoseDataProcessing**: Processes imported keypoint data to normalize and prepare it for evaluation.
 
-## **com.instructor.evaluation**
+- ## **com.instructor.evaluation**
   - **PoseFeedback**: Provides real-time feedback to users based on their pose accuracy compared to the professional dancer's poses.
   - **PoseScoring**: Implements algorithms to calculate a similarity score between user poses and reference poses, aiding in performance assessment.
 
-## **com.instructor.main**
+- ## **com.instructor.main**
   - **Starter**: The main entry point of the application, initializing components and starting the pose estimation and evaluation process.
 
 

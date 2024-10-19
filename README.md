@@ -4,7 +4,7 @@
 - (`pose_detection`) collects user data by video capture when running a Java application.
 - Run (`Starter.java`) to start the Java application.
 
-## Packages
+# Current Packages
 
 - **com.instructor.algorithms**
   - **MergeSort**: Implements the Merge Sort algorithm to efficiently sort user performance or ranking.

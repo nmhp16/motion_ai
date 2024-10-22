@@ -12,23 +12,23 @@ import java.io.IOException;
 public class DanceInstructorUI extends Application {
 
     public static void main(String[] args) {
-    	launch(args);
+        launch(args);
     }
-    
+
     @Override
     public void start(Stage primaryStage) throws Exception {
-    	
-    	try {
-	    	// Load the FXML file
-    		FXMLLoader loader = new FXMLLoader(getClass().getResource("DanceInstructorUI.fxml"));
-	    	Parent root = loader.load();
-	    	primaryStage.setTitle("AI Dance Instructor");
-	    	primaryStage.setScene(new Scene(root, 400, 300));
-	    	primaryStage.show();
-	    	
-    	} catch (IOException e) {
-    		e.printStackTrace();
-    		System.out.println("Failed to load FXML fie.");
-    	}
+
+        try {
+            // Load the FXML file
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("DanceInstructorUI.fxml"));
+            Parent root = loader.load();
+            primaryStage.setTitle("AI Dance Instructor");
+            primaryStage.setScene(new Scene(root, 400, 300));
+            primaryStage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Failed to load FXML fie.");
+        }
     }
 }

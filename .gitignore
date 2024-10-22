@@ -34,5 +34,3 @@ Thumbs.db          # Windows
 *~                   # Backup files created by some editors
 *.bak                # Backup files
 
-# Maven local repository (optional)
-.mvn/

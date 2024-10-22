@@ -1,1 +1,38 @@
+# Maven target directory
 /target/
+
+# IDE-specific files
+.idea/
+*.iml
+*.class
+.classpath
+
+# Eclipse specific files
+.settings/
+.project
+
+# IntelliJ IDEA specific files
+out/
+*.ipr
+*.iws
+
+# Visual Studio Code specific files
+.vscode/
+
+# OS-specific files
+.DS_Store           # macOS
+Thumbs.db          # Windows
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*~                   # Backup files created by some editors
+*.bak                # Backup files
+
+# Maven local repository (optional)
+.mvn/

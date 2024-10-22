@@ -114,7 +114,7 @@ class PoseEstimationService:
                 mp_pose.PoseLandmark.LEFT_KNEE.value: "knee_left",
                 mp_pose.PoseLandmark.RIGHT_KNEE.value: "knee_right",
                 mp_pose.PoseLandmark.LEFT_ANKLE.value: "ankle_left",
-                mp_pose.PoseLandmark.RIGHT_ANKLE.value: "ankle_right"
+                mp_pose.PoseLandmark.RIGHT_ANKLE.value: "ankle_right",
                 mp_pose.PoseLandmark.LEFT_HEEL.value: "heel_left",
             	mp_pose.PoseLandmark.RIGHT_HEEL.value: "heel_right",
             	mp_pose.PoseLandmark.LEFT_FOOT_INDEX.value: "foot_index_left",

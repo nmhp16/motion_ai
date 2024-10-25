@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+// Test
 // TODO: COMPLETE USER INTERFACE BY IMPORTING "DanceInstructorUI.fxml" INTO SCENE BUILDER AND CHANGE IT
 public class DanceInstructorUI extends Application {
 

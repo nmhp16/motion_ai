@@ -70,26 +70,41 @@ public class Starter {
         // Read this .txt file to populate userKeypoints
         // userKeypointsMap = poseDataReader.readKeypointsFromFile("userKeypoints.txt");
 
+        // Load keypoints from files
         userKeypointsMap = poseDataReader
                 .readKeypointsFromFile("./motion_database/ballet_spin/beginner.txt");
         proKeypointsMap = poseDataReader.readKeypointsFromFile("./motion_database/ballet_spin/pro.txt");
 
-        // Normalize the keypoints for both user and pro
+        // Clean missing keypoints for both user and pro datasets
+        Map<String, Map<Integer, float[]>> cleanedUserKeypoints = poseDataProcessing
+                .cleanMissingKeypoints(userKeypointsMap);
+        Map<String, Map<Integer, float[]>> cleanedProKeypoints = poseDataProcessing
+                .cleanMissingKeypoints(proKeypointsMap);
+
+        // Smooth the cleaned keypoints with defined window size
+        int windowSize = 5;
+        Map<String, Map<Integer, float[]>> smoothedUserKeypoints = poseDataProcessing
+                .smoothKeypoints(cleanedUserKeypoints, windowSize);
+        Map<String, Map<Integer, float[]>> smoothedProKeypoints = poseDataProcessing
+                .smoothKeypoints(cleanedProKeypoints, windowSize);
+
+        // Normalize the cleaned keypoints for both user and pro
         Map<String, Map<Integer, float[]>> normalizedUserKeypoints = poseDataProcessing
-                .normalizeKeypoints(userKeypointsMap);
+                .normalizeKeypoints(smoothedUserKeypoints);
         Map<String, Map<Integer, float[]>> normalizedProKeypoints = poseDataProcessing
-                .normalizeKeypoints(proKeypointsMap);
+                .normalizeKeypoints(smoothedProKeypoints);
 
         // Calculate similarity score between user and pro
         float similarityScore = poseDataProcessing.calculateSimilarity(normalizedUserKeypoints, normalizedProKeypoints);
 
         // Assume max similarity
-        float maxSimilarity = 3.0f; // Replace with actual value
+        float maxSimilarity = 2.0f; // Replace with actual value
 
         // Calculate final score
         int finalScore = poseScoring.calculateScore(similarityScore, maxSimilarity);
 
         // Output similarity score and final score
+        System.out.println();
         System.out.println("Similarity Score: " + similarityScore);
         System.out.println("Final Score (out of 100): " + finalScore);
 

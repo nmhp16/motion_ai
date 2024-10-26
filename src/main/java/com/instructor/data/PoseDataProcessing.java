@@ -2,6 +2,9 @@ package com.instructor.data;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class PoseDataProcessing {
 
@@ -134,4 +137,136 @@ public class PoseDataProcessing {
 		return 0;
 	}
 
+	/**
+	 * Clean missing keypoints by filling them with interpolated values from
+	 * neighboring frames
+	 * 
+	 * @param keypoints Map of all keypoints (body parts), frame, coordinates (x,
+	 *                  y, z)
+	 * @return Map of cleaned keypoints with interpolated missing values for each
+	 *         frame
+	 */
+	public Map<String, Map<Integer, float[]>> cleanMissingKeypoints(Map<String, Map<Integer, float[]>> keypoints) {
+		// Initialize map to store cleaned keypoints with interpolated data
+		Map<String, Map<Integer, float[]>> cleanedKeypoints = new HashMap<>();
+
+		// Iterate through each keypoint type in input data
+		for (String keypoint : keypoints.keySet()) {
+			Map<Integer, float[]> keypointFrames = keypoints.get(keypoint);
+			List<Integer> frames = new ArrayList<>(keypointFrames.keySet());
+			Collections.sort(frames); // TODO: Change with merge sort later
+
+			Map<Integer, float[]> interpolatedFrames = new HashMap<>(keypointFrames); // Start with available data
+
+			// Interpolate values for missing frames by filling gap between known frames
+			for (int i = 0; i < frames.size() - 1; i++) {
+				int startFrame = frames.get(i); // Frame with known coordinates at the start of a gap
+				int endFrame = frames.get(i + 1); // Frame with known coordinates at the end of a gap
+				float[] startCoords = keypointFrames.get(startFrame); // Coordinates for startFrame
+				float[] endCoords = keypointFrames.get(endFrame); // Coordinates for endFrame
+
+				// Check that startCoords and endCoords are valid
+				if (startCoords == null || endCoords == null) {
+					continue; // Skip interpolation if either coordinate set is missing
+				}
+
+				if (startCoords.length != 3 || endCoords.length != 3) {
+					throw new IllegalArgumentException("Coordinates must be 3-dimensional.");
+				}
+
+				// Interpolate for missing frames between start and end frame
+				for (int j = startFrame + 1; j < endFrame; j++) {
+					float fraction = (float) (j - startFrame) / (endFrame - startFrame); // Fractional position in the
+																							// gap
+					float[] interpolatedCoords = new float[3]; // (x, y, z) coordinates
+
+					// Interpolate each coordinate based on fraction
+					for (int k = 0; k < 3; k++) {
+						interpolatedCoords[k] = startCoords[k] + fraction * (endCoords[k] - startCoords[k]);
+					}
+					interpolatedFrames.put(j, interpolatedCoords); // Add interpolated coordinates for frame j
+				}
+			}
+			// Add completed map with interpolated values
+			cleanedKeypoints.put(keypoint, interpolatedFrames);
+		}
+		return cleanedKeypoints; // Return map of keypoints with interpolated data for missing frames
+	}
+
+	/**
+	 * Smooth keypoint data using a simple moving average
+	 * 
+	 * @param keypoints  Map of keypoints
+	 * @param windowSize Number of frames to consider for smoothing
+	 * @return Smoothed Keypoints
+	 */
+	public Map<String, Map<Integer, float[]>> smoothKeypoints(Map<String, Map<Integer, float[]>> keypoints,
+			int windowSize) {
+		// Initialize map to store smoothed keypoints
+		Map<String, Map<Integer, float[]>> smoothedKeypoints = new HashMap<>();
+
+		// Iterate over each keypoint in provided data
+		for (String keypoint : keypoints.keySet()) {
+			smoothedKeypoints.put(keypoint, new HashMap<>());
+
+			// Get sorted frame keys to ensure the window applies across available frame.
+			List<Integer> frames = new ArrayList<>(keypoints.get(keypoint).keySet());
+			Collections.sort(frames); // TODO: Can change with merge sort later
+
+			// Apply smoothing for each frame
+			for (int i = 0; i < frames.size(); i++) {
+				int currentFrame = frames.get(i);
+				// Calculate the smoothed coordinates for current frame
+				float[] smoothedCoords = movingAverage(keypoints, keypoint, frames, i, windowSize);
+				// Store smoothed coordinates
+				smoothedKeypoints.get(keypoint).put(currentFrame, smoothedCoords);
+			}
+		}
+		return smoothedKeypoints;
+	}
+
+	/**
+	 * Helper method to calculate the moving average for a given frame
+	 * 
+	 * @param keypoints    Map containing all keypoint data
+	 * @param keypoint     Specific keypoint being smoothed
+	 * @param frames       Sorted lis of frames for this keypoint
+	 * @param currentIndex Current index in frame list
+	 * @param windowSize   Number of frames in smoothing window
+	 * @return The smoothed 3D coordinates for current frame
+	 */
+	private float[] movingAverage(Map<String, Map<Integer, float[]>> keypoints, String keypoint, List<Integer> frames,
+			int currentIndex, int windowSize) {
+		int halfWindow = windowSize / 2; // Determine range on either side of current frame
+		float[] sum = new float[3]; // Array to hold cumulative sum of coordinates
+		int count = 0; // Count of valid frames in window
+
+		// Calculate the starting index of smoothing window, at least > 0
+		int start = Math.max(0, currentIndex - halfWindow);
+
+		// Calculate the ending index of smoothing window, at most < last frame index
+		int end = Math.min(currentIndex + halfWindow, frames.size() - 1);
+
+		// Calculate the window range around the current frame index.
+		for (int i = start; i <= end; i++) {
+			int frame = frames.get(i);
+			float[] coords = keypoints.get(keypoint).get(frame);
+
+			// Add coordinates to sum if they exist
+			if (coords != null) {
+				sum[0] += coords[0];
+				sum[1] += coords[1];
+				sum[2] += coords[2];
+				count++;
+			}
+		}
+
+		// Average the sum to get the smoothed values.
+		if (count > 0) {
+			sum[0] /= count;
+			sum[1] /= count;
+			sum[2] /= count;
+		}
+		return sum; // Return smoothed 3D coordinates
+	}
 }

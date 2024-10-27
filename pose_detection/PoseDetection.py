@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 # Initialize MediaPipe Pose and Hands
 mp_pose = mp.solutions.pose
@@ -136,15 +137,31 @@ class PoseEstimationService:
         )
 
     def save_keypoints_data(self):
+        # Define base file name
+        base_filename = 'user'
+        extension = '.txt'
+        filename = f"{base_filename}{extension}"
+        counter = 1
+
+        # Check if the file already exists and incrementally create new filename
+        while os.path.exists(filename):
+            filename = f"{base_filename}_{counter}{extension}"
+            counter += 1
+
         # Save the keypoints data to a .txt file
-        with open('userKeypoints.txt', 'w') as f:
+        with open(filename, 'w') as f:
             for keypoint, positions in self.keypoints_data.items():
                 if positions:
                     f.write(f"{keypoint}:\n")
                     for pos in positions:
                         f.write(f"  Frame {pos[0]}: x={pos[1]:.4f}, y={pos[2]:.4f}, z={pos[3]:.4f}\n")
                     f.write("\n")
-        print("Keypoints data saved to userKeypoints.txt")
+        print(f"Saved keypoints data to {filename}")
+        
+        # Append to the shared file if it exists, otherwise create and write
+        mode = 'a' if os.path.exists("last_saved_filename.txt") else 'w'
+        with open("last_saved_filename.txt", mode) as shared_file:
+            shared_file.write(self.keypoints_file + '\n')
 
     def plot_keypoints_with_distance(self):
         plt.figure(figsize=(12, 6))

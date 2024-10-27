@@ -1,4 +1,4 @@
-package com.instructor.main;
+package com.instructor.controller;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -12,13 +12,12 @@ import java.io.IOException;
 
 import com.instructor.data.PoseDataProcessing;
 import com.instructor.data.PoseDataReader;
-import com.instructor.evaluation.PoseScoring;
 
-public class Starter {
+public class ApplicationHandler {
         private PoseDataReader poseDataReader;
         private PoseDataProcessing poseDataProcessing;
 
-        public Starter() {
+        public ApplicationHandler() {
                 // Initialize PoseDataReader
                 this.poseDataReader = new PoseDataReader();
                 this.poseDataProcessing = new PoseDataProcessing();

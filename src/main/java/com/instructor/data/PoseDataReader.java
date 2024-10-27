@@ -2,6 +2,7 @@ package com.instructor.data;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -92,5 +93,51 @@ public class PoseDataReader {
                         coordinates[2]);
             }
         }
+    }
+
+    /**
+     * Method to get the most recent file created by user from file name list
+     * 
+     * @param filePath Location of txt file containing user generated file
+     * @return Most recent file name
+     */
+    public String readLastSavedFileName(String filePath) {
+        String lastLine = null;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String currentLine;
+
+            while ((currentLine = reader.readLine()) != null) {
+                lastLine = currentLine; // Keep updating lastLine until end of file
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading the last saved file name: " + e.getMessage());
+        }
+        return lastLine;
+    }
+
+    /**
+     * Method to process the user file for pose estimation
+     * 
+     * @return Updated map of user keypoints
+     */
+    public Map<String, Map<Integer, float[]>> readUserFile() {
+        Map<String, Map<Integer, float[]>> userKeypointsMap = new HashMap<>(); // Initialize map to store user
+                                                                               // data
+
+        // Read the last saved filename from last_saved_filename.txt
+        String keypointsFileName = readLastSavedFileName("last_saved_filename.txt");
+
+        if (keypointsFileName != null) {
+            // Use the file name to read keypoints from the newly created file
+            userKeypointsMap = readKeypointsFromFile(keypointsFileName);
+
+            // Process the keypoints map as needed
+            System.out.println("Successfully read keypoints from: " + keypointsFileName);
+        } else {
+            System.out.println("Failed to read the keypoints file name.");
+        }
+
+        return userKeypointsMap; // Return the populated map
     }
 }

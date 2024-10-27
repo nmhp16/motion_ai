@@ -269,4 +269,29 @@ public class PoseDataProcessing {
 		}
 		return sum; // Return smoothed 3D coordinates
 	}
+
+	/**
+	 * Method to process pose data from given map
+	 * 
+	 * @param keypointsMap Map to be process
+	 * @return Processed map
+	 */
+	public Map<String, Map<Integer, float[]>> processPoseData(Map<String, Map<Integer, float[]>> keypointsMap) {
+		Map<String, Map<Integer, float[]>> processedMap; // Initialize keypoints map to store processed data
+
+		// Clean missing keypoints for both user and pro datasets
+		processedMap = cleanMissingKeypoints(keypointsMap);
+
+		// Smooth the cleaned keypoints with defined window size
+		int windowSize = 5;
+
+		processedMap = smoothKeypoints(processedMap, windowSize);
+
+		// Normalize the cleaned keypoints for both user and pro
+		processedMap = normalizeKeypoints(processedMap);
+
+		// TODO: Calculate DTW Score
+
+		return processedMap;
+	}
 }

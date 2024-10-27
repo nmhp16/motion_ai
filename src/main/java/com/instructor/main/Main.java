@@ -50,10 +50,10 @@ public class Main {
                 handler.runCapturePoseEstimation();
 
                 // Process user video to get data
-                userKeypointsMap = handler.processUserFile();
+                userKeypointsMap = poseDataReader.readUserFile();
 
                 // Process user data
-                userKeypointsMap = handler.processPoseData(userKeypointsMap);
+                userKeypointsMap = poseDataProcessing.processPoseData(userKeypointsMap);
 
                 // TODO: Decision Tree for classification to get correct pro video
 
@@ -74,10 +74,10 @@ public class Main {
                 handler.runUploadPoseEstimation(userFile, "Beginner");
 
                 // Process user video to get data
-                userKeypointsMap = handler.processUserFile();
+                userKeypointsMap = poseDataReader.readUserFile();
 
                 // Process user data
-                userKeypointsMap = handler.processPoseData(userKeypointsMap);
+                userKeypointsMap = poseDataProcessing.processPoseData(userKeypointsMap);
 
                 // TODO: Decision Tree for classification to get correct pro video
                 break;
@@ -89,8 +89,8 @@ public class Main {
                         .readKeypointsFromFile("./motion_database/ballet_spin/beginner.txt");
                 proKeypointsMap = poseDataReader.readKeypointsFromFile("./motion_database/ballet_spin/pro.txt");
 
-                userKeypointsMap = handler.processPoseData(userKeypointsMap);
-                proKeypointsMap = handler.processPoseData(proKeypointsMap);
+                userKeypointsMap = poseDataProcessing.processPoseData(userKeypointsMap);
+                proKeypointsMap = poseDataProcessing.processPoseData(proKeypointsMap);
 
                 // Calculate similarity score between user and pro
                 float similarityScore = poseDataProcessing.calculateSimilarity(userKeypointsMap, proKeypointsMap);

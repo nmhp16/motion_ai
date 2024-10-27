@@ -12,7 +12,7 @@ import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instances;
 
-// TODO: COMPLETE DECISION TREE FOR CLASSIFYING CORRECT/INCORRECT POSE
+// TODO: COMPLETE DECISION TREE FOR CLASSIFYING CORRECT/INCORRECT POSE AND TO DETERMINE DANCE MOVES
 public class DecisionTree {
 
 	private J48 tree; // Weka's Decision Tree Classifier

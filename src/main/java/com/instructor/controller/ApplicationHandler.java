@@ -129,13 +129,11 @@ public class ApplicationHandler {
                 String keypointsFileName = readLastSavedFileName("last_saved_filename.txt");
 
                 if (keypointsFileName != null) {
-                        String filePath = "keypointsFilename";
-
                         // Use the file name to read keypoints from the newly created file
-                        userKeypointsMap = poseDataReader.readKeypointsFromFile(filePath);
+                        userKeypointsMap = poseDataReader.readKeypointsFromFile(keypointsFileName);
 
                         // Process the keypoints map as needed
-                        System.out.println("Successfully read keypoints from: " + filePath);
+                        System.out.println("Successfully read keypoints from: " + keypointsFileName);
                 } else {
                         System.out.println("Failed to read the keypoints file name.");
                 }

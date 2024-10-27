@@ -31,6 +31,9 @@ public class Main {
         // User input file path
         String userFile = null;
 
+        // TODO: Store user performance score in new text file from file name in
+        // TODO: "last_saved_filename.txt" if exists
+
         // User input options
         System.out.println();
         System.out.println("Please select options below:");
@@ -60,12 +63,15 @@ public class Main {
                 System.out.println("Enter the path for the user keypoints file: ");
                 userFile = scanner.nextLine(); // Assign value to userFile
 
-                if (userFile != null) {
-                    // Allow user to upload video to be compared
-                    handler.runUploadPoseEstimation(userFile, "Beginner");
-                } else {
+                // Ensure a valid .mp4 file path is provided
+                while (userFile == null || userFile.isEmpty() || !userFile.endsWith(".mp4")) {
                     System.out.println("No valid user file path provided");
+                    System.out.println("Enter the path for the user keypoints file: ");
+                    userFile = scanner.nextLine(); // Assign value to userFile
                 }
+
+                // Allow user to upload video to be compared
+                handler.runUploadPoseEstimation(userFile, "Beginner");
 
                 // Process user video to get data
                 userKeypointsMap = handler.processUserFile();

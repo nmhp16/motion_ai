@@ -19,21 +19,39 @@ class PoseEstimationService:
         self.video_path = video_path
         self.video_type = video_type.lower() # "beginner" or "pro"
 
+         # Load existing file names to avoid conflicts
+        self.existing_filenames = self.load_existing_filenames()
+
         # Set filenames based on video type
         self.keypoints_file = self.generate_filename(f"{self.video_type}.txt")
         self.video_file = self.generate_filename(f"{self.video_type}.avi")
 
+    def load_existing_filenames(self):
+        if os.path.exists("last_saved_filename.txt"):
+            with open("last_saved_filename.txt", 'r') as f:
+                return {line.strip() for line in f}  # Use a set for fast lookup
+            
+        return set()
+
     def generate_filename(self, base_filename):
-        #Increment filename if it already exists
-        filename, extension = os.path.splitext(base_filename)
-        counter = 1
+        # Initialize base name and extension
+        base_name, extension = os.path.splitext(base_filename)
+        counter = 0
 
-        while os.path.exists(f"{filename}{extension}"):
-            filename = f"{filename.split('_')[0]}_{self.video_type}_{counter}"
+        # Check if the base name exists in existing filenames
+        if base_filename not in self.existing_filenames and not os.path.exists(base_filename):
+            return base_filename # Return base name if it doesn't exist
+        
+        # Increment filename if it already exists
+        while True:
             counter += 1
+            new_filename = f"{base_name}_{counter}{extension}" # Generate new file name
 
-        return f"{filename}{extension}"
-
+            if new_filename not in self.existing_filenames and not os.path.exists(new_filename):
+                # Add the new filename to existing filenames set to avoid future conflicts
+                self.existing_filenames.add(new_filename)
+                return new_filename  # Return the first non-existing filename 
+            
     def initialize_keypoints_data(self):
         return {
             "nose": [], "left_eye": [], "right_eye": [], "left_ear": [], "right_ear": [],
@@ -108,7 +126,6 @@ class PoseEstimationService:
         cv2.destroyAllWindows()
 
         self.save_keypoints_data()  # Save keypoints data to a text file
-        self.plot_keypoints_with_distance()  # Call the plot function after capturing
 
     def extract_pose_keypoints(self, landmarks):
         keypoint_map = {
@@ -165,26 +182,6 @@ class PoseEstimationService:
         mode = 'a' if os.path.exists("last_saved_filename.txt") else 'w'
         with open("last_saved_filename.txt", mode) as shared_file:
             shared_file.write(self.keypoints_file + '\n')
-
-    def plot_keypoints_with_distance(self):
-        plt.figure(figsize=(12, 6))
-        for keypoint, positions in self.keypoints_data.items():
-            if positions:
-                time_vals = [pos[0] for pos in positions]
-                x_vals = [pos[1] for pos in positions]
-                y_vals = [pos[2] for pos in positions]
-                distance_vals = [np.sqrt(x ** 2 + y ** 2) for x, y in zip(x_vals, y_vals)]
-
-                plt.plot(time_vals, distance_vals, label=f'{keypoint} Distance', linestyle=':', marker='x')
-
-        plt.title('Keypoint Coordinates and Distance Over Time')
-        plt.xlabel('Frame Index (Time)')
-        plt.ylabel('Distance from Origin')
-        plt.grid()
-        plt.legend()
-        plt.tight_layout()
-        plt.savefig('keypoints_coordinates_distance_plot.png')
-        plt.show()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process a video for pose estimation.")

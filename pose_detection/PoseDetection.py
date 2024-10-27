@@ -16,6 +16,36 @@ class PoseEstimationService:
         self.keypoints_data = self.initialize_keypoints_data()
         self.frame_counter = 0
 
+        # Load existing file names to avoid conflicts
+        self.existing_filenames = self.load_existing_filenames()
+
+        # Set the output video file name
+        self.video_file = self.generate_filename("user.avi")
+
+        # Set the keypoints file name
+        self.keypoints_file = self.generate_filename("user.txt")
+    
+    def load_existing_filenames(self):
+        if os.path.exists("last_saved_filename.txt"):
+            with open("last_saved_filename.txt", 'r') as f:
+                return {line.strip() for line in f} # Use a set for fast look up
+        return set()
+
+    def generate_filename(self, base_filename):
+        counter = 0
+        original_base_filename = base_filename
+
+        # Check if the base file name exists
+        while base_filename in self.existing_filenames or os.path.exists(base_filename):
+            base_name, extension = os.path.splitext(original_base_filename)
+            counter += 1
+            base_filename = f"{base_name}_{counter}{extension}"
+
+        # Add the newly generated filename to the existing filenames set
+        self.existing_filenames.add(base_filename)
+
+        return base_filename
+
     def initialize_keypoints_data(self):
         return {
             "nose": [],
@@ -49,7 +79,7 @@ class PoseEstimationService:
 
         # Define the codec and create VideoWriter object
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        out = cv2.VideoWriter('output.avi', fourcc, 20.0, (frame_width, frame_height))
+        out = cv2.VideoWriter(self.video_file, fourcc, 20.0, (frame_width, frame_height))
 
         while cap.isOpened():
             ret, frame = cap.read()
@@ -93,7 +123,6 @@ class PoseEstimationService:
         cv2.destroyAllWindows()
 
         self.save_keypoints_data()  # Save keypoints data to a text file
-        self.plot_keypoints_with_distance()  # Call the plot function after capturing
 
     def extract_pose_keypoints(self, landmarks):
         for idx, landmark in enumerate(landmarks):
@@ -137,52 +166,20 @@ class PoseEstimationService:
         )
 
     def save_keypoints_data(self):
-        # Define base file name
-        base_filename = 'user'
-        extension = '.txt'
-        filename = f"{base_filename}{extension}"
-        counter = 1
-
-        # Check if the file already exists and incrementally create new filename
-        while os.path.exists(filename):
-            filename = f"{base_filename}_{counter}{extension}"
-            counter += 1
-
         # Save the keypoints data to a .txt file
-        with open(filename, 'w') as f:
+        with open(self.keypoints_file, 'w') as f:
             for keypoint, positions in self.keypoints_data.items():
                 if positions:
                     f.write(f"{keypoint}:\n")
                     for pos in positions:
                         f.write(f"  Frame {pos[0]}: x={pos[1]:.4f}, y={pos[2]:.4f}, z={pos[3]:.4f}\n")
                     f.write("\n")
-        print(f"Saved keypoints data to {filename}")
+        print(f"Saved keypoints data to {self.keypoints_file}")
         
         # Append to the shared file if it exists, otherwise create and write
         mode = 'a' if os.path.exists("last_saved_filename.txt") else 'w'
         with open("last_saved_filename.txt", mode) as shared_file:
             shared_file.write(self.keypoints_file + '\n')
-
-    def plot_keypoints_with_distance(self):
-        plt.figure(figsize=(12, 6))
-        for keypoint, positions in self.keypoints_data.items():
-            if positions:
-                time_vals = [pos[0] for pos in positions]
-                x_vals = [pos[1] for pos in positions]
-                y_vals = [pos[2] for pos in positions]
-                distance_vals = [np.sqrt(x ** 2 + y ** 2) for x, y in zip(x_vals, y_vals)]
-
-                plt.plot(time_vals, distance_vals, label=f'{keypoint} Distance', linestyle=':', marker='x')
-
-        plt.title('Keypoint Coordinates and Distance Over Time')
-        plt.xlabel('Frame Index (Time)')
-        plt.ylabel('Distance from Origin')
-        plt.grid()
-        plt.legend()
-        plt.tight_layout()
-        plt.savefig('user_plot.png')  # Save the plot
-        plt.show() # Replace with plt.close() if does not want to display the plot
-
 
 # Start the video capture in Python
 pose_service = PoseEstimationService()

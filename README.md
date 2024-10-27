@@ -17,6 +17,7 @@
        
 2. ### com.instructor.controller
    - **ApplicationHandler**: Responsible for calling the `Python` script, to capture user video or get user uploaded video.
+   - **FileCleanup**: Clean up unavailable existing filenames, and write new files, store a Set of user filenames.
      
 3. ### com.instructor.data
    - **PoseDataReader**: Responsible for reading and importing pose keypoint data from video files into the system.

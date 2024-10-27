@@ -3,11 +3,9 @@ package com.instructor.main;
 import com.instructor.data.PoseDataProcessing;
 import com.instructor.data.PoseDataReader;
 import com.instructor.evaluation.PoseScoring;
+import com.instructor.controller.ApplicationHandler;
 
 import java.util.Scanner;
-
-import com.instructor.data.*;
-import com.instructor.evaluation.PoseScoring;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +23,7 @@ public class Main {
         Map<String, Map<Integer, float[]>> proKeypointsMap = new HashMap<>();
 
         // Create the entry point for communication
-        Starter handler = new Starter();
+        ApplicationHandler handler = new ApplicationHandler();
 
         // Create a Scanner object for user input
         Scanner scanner = new Scanner(System.in);

@@ -9,28 +9,28 @@
 ## Current Packages
 
 1. ### com.instructor.algorithms
-   - `**MergeSort**`: Implements the Merge Sort algorithm to efficiently sort user performance or rankings.
-   - **DecisionTree**: 
+   - **`MergeSort`**: Implements the Merge Sort algorithm to efficiently sort user performance or rankings.
+   - **`DecisionTree`**: 
      - Utilizes Weka for training a decision tree model to classify dance poses based on key point data.
-   - **DynamicTimeWarping**: 
+   - **`DynamicTimeWarping`**: 
      - Accounts for frame rates and timing differences between user and professional poses, facilitating accurate comparisons.
        
 2. ### com.instructor.controller
-   - **ApplicationHandler**: Responsible for calling the `Python` script, to capture user video or get user uploaded video.
-   - **FileCleanup**: Clean up unavailable existing filenames, and write new files, store a Set of user filenames.
+   - **`ApplicationHandler`**: Responsible for calling the `Python` script, to capture user video or get user uploaded video.
+   - **`FileCleanup`**: Clean up unavailable existing filenames, and write new files, store a Set of user filenames.
      
 3. ### com.instructor.data
-   - **PoseDataReader**: Responsible for reading and importing pose keypoint data from video files into the system.
-   - **PoseDataProcessing**: Processes imported key point data to normalize and prepare it for evaluation.
+   - **`PoseDataReader`**: Responsible for reading and importing pose keypoint data from video files into the system.
+   - **`PoseDataProcessing`**: Processes imported key point data to normalize and prepare it for evaluation.
 
 4. ### com.instructor.evaluation
-   - **PoseFeedback**: Provides real-time feedback to users based on their pose accuracy compared to the professional dancer's poses.
-   - **PoseScoring**: Implements algorithms to calculate a similarity score between user poses and reference poses, aiding in performance assessment.
+   - **`PoseFeedback`**: Provides real-time feedback to users based on their pose accuracy compared to the professional dancer's poses.
+   - **`PoseScoring`**: Implements algorithms to calculate a similarity score between user poses and reference poses, aiding in performance assessment.
 
 5. ### com.instructor.main
-   - **Main**: Main class, start application.
-   - **DanceInstructorUI**: Launches JavaFX user interface.
-   - **DanceInstructorUIController**: Handle button and UI interaction in `DanceInstructorUI.fxml` created by `SceneBuilder`.
+   - **`Main`**: Main class, start application.
+   - **`DanceInstructorUI`**: Launches JavaFX user interface.
+   - **`DanceInstructorUIController`**: Handle button and UI interaction in `DanceInstructorUI.fxml` created by `SceneBuilder`.
 
 ## MediaPipe Keypoints (33)
 ![MediaPipes-33-key-points-29-1](https://github.com/user-attachments/assets/a61fac5e-3127-4d5b-ad49-0227656b3ee6)

@@ -3,13 +3,13 @@
 ## **Usage Instructions**
 - Use (`motion_database`) to collect pro dancer data by adding a video file and run (`PoseDetection.py`).
 - (`pose_detection`) collects user data by video capture when running a Java application.
-- Run (`Starter.java`) to start the Java application.
+- Run (`Main.java`) to start the Java application.
 - Run the JavaFX UI with (`DanceInstructorUI.java`) by `mvn javafx:run`
 
 ## Current Packages
 
 1. ### com.instructor.algorithms
-   - **MergeSort**: Implements the Merge Sort algorithm to efficiently sort user performance or rankings.
+   - **`MergeSort`**: Implements the Merge Sort algorithm to efficiently sort user performance or rankings.
    - **DecisionTree**: 
      - Utilizes Weka for training a decision tree model to classify dance poses based on key point data.
    - **DynamicTimeWarping**: 

@@ -9,7 +9,7 @@
 ## Current Packages
 
 1. ### com.instructor.algorithms
-   - **`MergeSort`**: Implements the Merge Sort algorithm to efficiently sort user performance or rankings.
+   - `**MergeSort**`: Implements the Merge Sort algorithm to efficiently sort user performance or rankings.
    - **DecisionTree**: 
      - Utilizes Weka for training a decision tree model to classify dance poses based on key point data.
    - **DynamicTimeWarping**: 

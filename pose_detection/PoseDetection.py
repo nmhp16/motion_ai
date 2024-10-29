@@ -180,9 +180,22 @@ class PoseEstimationService:
         mode = 'a' if os.path.exists("last_saved_filename.txt") else 'w'
         with open("last_saved_filename.txt", mode) as shared_file:
             shared_file.write(self.keypoints_file + '\n')
+            
+    def is_camera_available(self):
+        cap = cv2.VideoCapture(0)  # Try to open the default camera (index 0)
+        is_opened = cap.isOpened()  # Check if the camera is opened successfully
+        cap.release()  # Release the camera
+        return is_opened  # Return whether the camera is available
+
+
 
 # Start the video capture in Python
 pose_service = PoseEstimationService()
 
 # Start the video capture
-pose_service.start_video_capture()
+
+# Check if camera is available before starting video capture
+if pose_service.is_camera_available():
+    pose_service.start_video_capture()
+else:
+    print("Camera not detected. Please connect a camera and try again.")

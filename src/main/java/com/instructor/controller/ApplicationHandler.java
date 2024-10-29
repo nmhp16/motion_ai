@@ -2,43 +2,47 @@ package com.instructor.controller;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ApplicationHandler {
 
         /**
          * Method to capture user video for pose estimation
          */
-        public void runCapturePoseEstimation() {
+        public boolean runCapturePoseEstimation() {
                 try {
                         // Define the command to run the Python script
                         String pythonScriptPath = "./pose_detection/PoseDetection.py"; // Relative path
                         ProcessBuilder processBuilder = new ProcessBuilder("python", pythonScriptPath);
-
+                
                         // Set the redirect error stream to true to capture errors
                         processBuilder.redirectErrorStream(true);
-
+                
                         // Start the process
                         Process process = processBuilder.start();
-
+                
                         // Read the output of the script
                         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
                         String line;
-
+                
                         while ((line = reader.readLine()) != null) {
-                                System.out.println(line);
+                        System.out.println(line);
                         }
-
+                
                         // Wait for the process to finish
                         int exitCode = process.waitFor();
                         System.out.println("Python script exited with code: " + exitCode);
-
+                
+                        // Return true if exit code is 0, otherwise false
+                        return exitCode == 0;
+                
                 } catch (Exception e) {
                         e.printStackTrace();
+                        return false; // Return false in case of an exception
                 }
-        }
+                }
+            
 
         /**
          * Method to upload video for pose estimation

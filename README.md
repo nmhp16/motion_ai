@@ -30,7 +30,7 @@
 5. ### com.instructor.main
    - **`Main`**: Main class, start application.
    - **`DanceInstructorUI`**: Launches JavaFX user interface.
-   - **`DanceInstructorUIController`**: Handle button and UI interaction in `DanceInstructorUI.fxml` created by `SceneBuilder`.
+   - **`DanceInstructorUIController`**: Handle button and UI interaction in `DanceInstructorUI`.
 
 ## MediaPipe Keypoints (33)
 ![MediaPipes-33-key-points-29-1](https://github.com/user-attachments/assets/a61fac5e-3127-4d5b-ad49-0227656b3ee6)

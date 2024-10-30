@@ -35,7 +35,7 @@ class PoseEstimationService:
 
         # Define the codec and create VideoWriter object for keypoints-only video
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        out = cv2.VideoWriter('keypoints_line_video.avi', fourcc, 20.0, (frame_width, frame_height))
+        out = cv2.VideoWriter('pro.avi', fourcc, 20.0, (frame_width, frame_height))
 
         while cap.isOpened():
             ret, frame = cap.read()
@@ -132,14 +132,14 @@ class PoseEstimationService:
         )
 
     def save_keypoints_data(self):
-        with open('keypoints_data.txt', 'w') as f:
+        with open('pro.txt', 'w') as f:
             for keypoint, positions in self.keypoints_data.items():
                 if positions:
                     f.write(f"{keypoint}:\n")
                     for pos in positions:
                         f.write(f"  Frame {pos[0]}: x={pos[1]:.4f}, y={pos[2]:.4f}, z={pos[3]:.4f}\n")
                     f.write("\n")
-        print("Keypoints data saved to keypoints_data.txt")
+        print("pro.txt")
 
     def plot_keypoints_with_distance(self):
         plt.figure(figsize=(12, 6))
@@ -162,7 +162,7 @@ class PoseEstimationService:
         plt.show()
 
 # Start the video capture from a video file
-video_file_path = 'motion_database/Beginner.mp4'
+video_file_path = 'C:/Users/ACER/Downloads/hiphopmove.mp4'
 pose_service = PoseEstimationService(video_file_path)
 
 pose_service.start_video_capture()

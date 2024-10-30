@@ -158,7 +158,7 @@ class PoseEstimationService:
         plt.grid()
         plt.legend()
         plt.tight_layout()
-        plt.savefig('keypoints_coordinates_distance_plot.png')
+        plt.savefig('pro.png')
         plt.show()
 
 # Start the video capture from a video file

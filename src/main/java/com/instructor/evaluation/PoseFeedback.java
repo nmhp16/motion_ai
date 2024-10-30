@@ -1,30 +1,50 @@
 package com.instructor.evaluation;
 
+import java.util.Map;
+import java.util.HashMap;
+
 // TODO: COMPLETE FEEDBACK 
 public class PoseFeedback {
+    private Map<String, String> feedbackMap;
+
+    // Default Constructor
+    public PoseFeedback() {
+        feedbackMap = new HashMap<>();
+        initializeFeedback();
+    }
+
+    /**
+     * Helper method to initialize feedback
+     */
+    private void initializeFeedback() {
+        feedbackMap.put("excellent", "You can move on to the next move!");
+        feedbackMap.put("good", "Great Job! Keep up the good work!");
+        feedbackMap.put("average", "You're doing well, but there are few improvements needed!");
+        feedbackMap.put("poor", "Keep practicing, try to focus on key movements for better alignment!");
+    }
 
     /**
      * Method to print feedback
      * 
      * @param score User score
      */
-    public void getScoreFeedback(int score) {
+    public String provideFeedback(int score) {
         // Provide feedback based on score range
         // Case 1: Score >= 90
         if (score >= 90) {
-            System.out.println("Great Job! Keep it up!");
+            return feedbackMap.get("excellent");
         }
         // Case 2: 80 <= Score < 90
         else if (score >= 80) {
-            System.out.println("Good effort! Few improvements needed.");
+            return feedbackMap.get("good");
         }
         // Case 3: 70 <= Score < 80
         else if (score >= 70) {
-            System.out.println("Not bad, try practicing more.");
+            return feedbackMap.get("average");
         }
         // Case 4: Score < 70
         else {
-            System.out.println("Keep practicing!");
+            return feedbackMap.get("poor");
         }
     }
 
@@ -34,23 +54,14 @@ public class PoseFeedback {
      * @param score    User score
      * @param bodyPart Body part working on
      */
-    public void getScoreFeedback(int score, String bodyPart) {
-        // Provide feedback based on score and body part
-        // Case 1: Score >= 90
-        if (score >= 90) {
-            System.out.println("Great job matching your " + bodyPart + "!");
+    public String provideSpecificFeedback(int score, String bodyPart) {
+        String baseFeedBack = provideFeedback(score);
+
+        if (score < 90) {
+            return baseFeedBack + " Focus on your " + bodyPart + " for improvement.";
         }
-        // Case 2: 80 <= Score < 90
-        else if (score >= 80) {
-            System.out.println("Good effort matching your " + bodyPart + ". Few improvements needed.");
-        }
-        // Case 3: 70 <= Score < 80
-        else if (score >= 70) {
-            System.out.println("Not bad, try matching your " + bodyPart + " more.");
-        }
-        // Case 4: Score < 70
-        else {
-            System.out.println("Keep matching your " + bodyPart + "!");
-        }
+
+        // User ready to move on to next move, score >= 90
+        return baseFeedBack;
     }
 }

@@ -136,7 +136,7 @@ public class Main {
                     System.out.println("Final Score (out of 100): " + finalScore);
                     System.out.println();
 
-                    poseFeedback.getScoreFeedback(finalScore); // Display feedback based on score
+                    System.out.println(poseFeedback.provideFeedback(finalScore)); // Display feedback based on score
                     System.out.println();
                     break;
 

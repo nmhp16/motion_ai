@@ -16,7 +16,7 @@ public class PoseScoring {
 	private int averageScore;
 
 	// Threshold for considering a pose as "wrong"
-	private static final int THRESHOLD_SCORE = 60;
+	private static final int THRESHOLD_SCORE = 90;
 
 	/**
 	 * Give score based on the similarity between User and Pro
@@ -93,7 +93,7 @@ public class PoseScoring {
 				System.out.println("Average Score: " + averageScore);
 
 				// Provide feedback for the current frame
-				feedback.getScoreFeedback(averageScore, bodyPart);
+				System.out.println(feedback.provideSpecificFeedback(averageScore, bodyPart));
 				System.out.println();
 
 				if (lowScoreFrames.get(bodyPart) == null) {

@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 public class PoseDataProcessing {
-	private PoseDataReader poseDataReader = new PoseDataReader();
-
 	/**
 	 * Normalize keypoints so people of different body sizes are compared correctly.
 	 *

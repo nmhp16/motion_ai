@@ -96,6 +96,7 @@ public class PoseScoring {
 				System.out.println(feedback.provideSpecificFeedback(averageScore, bodyPart));
 				System.out.println();
 
+				// Check if there is bad score which < 90
 				if (lowScoreFrames.get(bodyPart) == null) {
 					System.out.println("Bad Scores: none");
 					System.out.println();
@@ -104,6 +105,7 @@ public class PoseScoring {
 					System.out.println();
 				}
 
+				// Check for incorrect frames connect with bad score
 				if (incorrectFrames.get(bodyPart) == null) {
 					System.out.println("Incorrect frames: none.");
 				} else {

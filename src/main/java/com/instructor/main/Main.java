@@ -10,6 +10,7 @@ import com.instructor.controller.ApplicationHandler;
 import com.instructor.controller.FileCleanup;
 import com.instructor.data.PoseDataProcessing;
 import com.instructor.data.PoseDataReader;
+import com.instructor.evaluation.PoseFeedback;
 import com.instructor.evaluation.PoseScoring;
 
 public class Main {
@@ -19,10 +20,12 @@ public class Main {
         Set<String> userHistory = new HashSet<>(); // Initialize Set to store user history
         userHistory = fileCleanup.getExistingFilenames(); // Store user performance history
 
-        // Instantiate PoseDataReader and PoseDataProcessing and Pose Scoring
+        // Instantiate PoseDataReader and PoseDataProcessing and Pose Scoring and Pose
+        // Feedback
         PoseDataReader poseDataReader = new PoseDataReader();
         PoseDataProcessing poseDataProcessing = new PoseDataProcessing();
         PoseScoring poseScoring = new PoseScoring();
+        PoseFeedback poseFeedback = new PoseFeedback();
 
         // Map <Keypoints (ex: left_leg), Map<Frame (ex: 1), coordinates (x,y,z)>>
         // Instantiate Hashmap to store user key points
@@ -107,25 +110,34 @@ public class Main {
 
                 case 0: // Test
                     // Load keypoints from files
-                    userKeypointsMap = poseDataReader.readKeypointsFromFile("./motion_database/ballet_spin/beginner.txt");
+                    userKeypointsMap = poseDataReader
+                            .readKeypointsFromFile("./motion_database/ballet_spin/beginner.txt");
                     proKeypointsMap = poseDataReader.readKeypointsFromFile("./motion_database/ballet_spin/pro.txt");
 
                     userKeypointsMap = poseDataProcessing.processPoseData(userKeypointsMap);
                     proKeypointsMap = poseDataProcessing.processPoseData(proKeypointsMap);
 
-                    // Calculate similarity score between user and pro
+                    // Calculate similarity score between user and pro based on total distance
+                    // difference
                     float similarityScore = poseDataProcessing.calculateSimilarity(userKeypointsMap, proKeypointsMap);
 
                     // Assume max similarity
-                    float maxSimilarity = 2.0f; // Replace with actual value
+                    float maxSimilarity = 4.0f; // Replace with actual value
 
                     // Calculate final score
                     int finalScore = poseScoring.calculateScore(similarityScore, maxSimilarity);
 
-                    // Output similarity score and final score
+                    // Calculate body parts score and get feedback
+                    poseScoring.calculatePoseScore(userKeypointsMap, proKeypointsMap);
+
+                    // Output similarity score and final score overall
                     System.out.println();
-                    System.out.println("Similarity Score: " + similarityScore);
+
                     System.out.println("Final Score (out of 100): " + finalScore);
+                    System.out.println();
+
+                    poseFeedback.getScoreFeedback(finalScore); // Display feedback based on score
+                    System.out.println();
                     break;
 
                 case 4: // Exit

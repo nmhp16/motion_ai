@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public class PoseDataProcessing {
+	private PoseDataReader poseDataReader = new PoseDataReader();
 
 	/**
 	 * Normalize keypoints so people of different body sizes are compared correctly.
@@ -81,7 +82,7 @@ public class PoseDataProcessing {
 	 * @param point2 Coordinates of the second point (x, y, z)
 	 * @return Euclidean distance between the two points
 	 */
-	public static float calculateDistance(float[] point1, float[] point2) {
+	public float calculateDistance(float[] point1, float[] point2) {
 		if (point1 == null || point2 == null) {
 			throw new IllegalArgumentException("Null points provided for distance calculation.");
 		}
@@ -112,7 +113,7 @@ public class PoseDataProcessing {
 	 * @param p3 Third keypoint
 	 * @return Angle in radians
 	 */
-	public static double calculateAngle(float[] p1, float[] p2, float[] p3) {
+	public double calculateAngle(float[] p1, float[] p2, float[] p3) {
 		float a = calculateDistance(p2, p3);
 		float b = calculateDistance(p1, p3);
 		float c = calculateDistance(p1, p2);

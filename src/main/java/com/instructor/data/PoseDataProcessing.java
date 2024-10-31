@@ -164,32 +164,57 @@ public class PoseDataProcessing {
 				float[] startCoords = keypointFrames.get(startFrame); // Coordinates for startFrame
 				float[] endCoords = keypointFrames.get(endFrame); // Coordinates for endFrame
 
-				// Check that startCoords and endCoords are valid
-				if (startCoords == null || endCoords == null) {
-					continue; // Skip interpolation if either coordinate set is missing
-				}
-
-				if (startCoords.length != 3 || endCoords.length != 3) {
-					throw new IllegalArgumentException("Coordinates must be 3-dimensional.");
-				}
-
-				// Interpolate for missing frames between start and end frame
-				for (int j = startFrame + 1; j < endFrame; j++) {
-					float fraction = (float) (j - startFrame) / (endFrame - startFrame); // Fractional position in the
-																							// gap
-					float[] interpolatedCoords = new float[3]; // (x, y, z) coordinates
-
-					// Interpolate each coordinate based on fraction
-					for (int k = 0; k < 3; k++) {
-						interpolatedCoords[k] = startCoords[k] + fraction * (endCoords[k] - startCoords[k]);
-					}
-					interpolatedFrames.put(j, interpolatedCoords); // Add interpolated coordinates for frame j
+				// Validate coordinates before proceeding
+				if (areValidCoordinates(startCoords, endCoords)) {
+					interpolateMissingFrames(interpolatedFrames, startFrame, endFrame, startCoords, endCoords);
 				}
 			}
 			// Add completed map with interpolated values
 			cleanedKeypoints.put(keypoint, interpolatedFrames);
 		}
 		return cleanedKeypoints; // Return map of keypoints with interpolated data for missing frames
+	}
+
+	/**
+	 * Helper method to verify if coordinates are valid
+	 * 
+	 * @param startCoords Starting coordinates array
+	 * @param endCoords   Ending coordinates array
+	 * @return True if valid, False otherwise
+	 */
+	private boolean areValidCoordinates(float[] startCoords, float[] endCoords) {
+		return startCoords != null && endCoords != null && startCoords.length == 3 && endCoords.length == 3;
+	}
+
+	/**
+	 * Helper method to linearly interpolate missing frames
+	 * 
+	 * @param interpolatedFrames Map of frames to be interpolated
+	 * @param startFrame         Start frame
+	 * @param endFrame           End frame
+	 * @param startCoords        Starting coordinates array
+	 * @param endCoords          Ending coordinates array
+	 */
+	private void interpolateMissingFrames(Map<Integer, float[]> interpolatedFrames, int startFrame, int endFrame,
+			float[] startCoords, float[] endCoords) {
+		// Interpolate for missing frames between start and end frame
+		for (int j = startFrame + 1; j < endFrame; j++) {
+
+			// Check if this frame already has coordinates
+			if (interpolatedFrames.containsKey(j)) {
+				continue; // Skip if frame
+			}
+
+			float fraction = (float) (j - startFrame) / (endFrame - startFrame); // Fractional position in the
+																					// gap
+			float[] interpolatedCoords = new float[3]; // (x, y, z) coordinates
+
+			// Interpolate each coordinate based on fraction
+			for (int k = 0; k < 3; k++) {
+				interpolatedCoords[k] = startCoords[k] + fraction * (endCoords[k] - startCoords[k]);
+			}
+			interpolatedFrames.put(j, interpolatedCoords); // Add interpolated coordinates for frame j
+		}
 	}
 
 	/**

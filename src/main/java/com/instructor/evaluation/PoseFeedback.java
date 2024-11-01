@@ -58,7 +58,12 @@ public class PoseFeedback {
         String baseFeedBack = provideFeedback(score);
 
         if (score < 90) {
-            return baseFeedBack + " Focus on your " + bodyPart + " for improvement.";
+            switch (bodyPart) {
+                case "nose":
+                    return baseFeedBack + " Focus on your head placement for improvement.";
+                default:
+                    return baseFeedBack + " Focus on your " + bodyPart + " for improvement.";
+            }
         }
 
         // User ready to move on to next move, score >= 90

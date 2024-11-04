@@ -20,6 +20,7 @@ public class PoseDataProcessing {
 		// Iterate over keypoints for each body part
 		for (String keypoint : keypoints.keySet()) {
 			normalizedKeypoints.put(keypoint, new HashMap<>()); // Initialize frame map
+
 			for (Map.Entry<Integer, float[]> entry : keypoints.get(keypoint).entrySet()) {
 				int frame = entry.getKey();
 				float[] coords = entry.getValue();
@@ -202,7 +203,7 @@ public class PoseDataProcessing {
 
 			// Check if this frame already has coordinates
 			if (interpolatedFrames.containsKey(j)) {
-				continue; // Skip if frame
+				continue; // Skip this frame
 			}
 
 			float fraction = (float) (j - startFrame) / (endFrame - startFrame); // Fractional position in the

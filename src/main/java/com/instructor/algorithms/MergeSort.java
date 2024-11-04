@@ -1,6 +1,7 @@
 package com.instructor.algorithms;
 
 // TODO: IMPLEMENT MERGE SORT FOR RANKING PERFORMANCE
+// TODO: Sort List<Integer> frames in ascending order 
 public class MergeSort {
     /**
      * Merge Sort to rank performances by scores

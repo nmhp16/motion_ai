@@ -112,8 +112,8 @@ public class Main {
                 case 0: // Test
                     // Load keypoints from files
                     userKeypointsMap = poseDataReader
-                            .readKeypointsFromFile("./motion_database/ballet_spin/beginner.txt");
-                    proKeypointsMap = poseDataReader.readKeypointsFromFile("./motion_database/ballet_spin/pro.txt");
+                            .readKeypointsFromFile("user_4.txt");
+                    proKeypointsMap = poseDataReader.readKeypointsFromFile("user_5.txt");
 
                     userKeypointsMap = poseDataProcessing.processPoseData(userKeypointsMap);
                     proKeypointsMap = poseDataProcessing.processPoseData(proKeypointsMap);

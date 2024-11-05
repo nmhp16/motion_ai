@@ -125,45 +125,63 @@ class PoseEstimationService:
         self.save_keypoints_data()  # Save keypoints data to a text file
 
     def extract_pose_keypoints(self, landmarks):
-        for idx, landmark in enumerate(landmarks):
-            # Map the index to body parts
-            keypoint_map = {
-                mp_pose.PoseLandmark.NOSE.value: "nose",
-                mp_pose.PoseLandmark.LEFT_EYE.value: "left_eye",
-                mp_pose.PoseLandmark.RIGHT_EYE.value: "right_eye",
-                mp_pose.PoseLandmark.LEFT_EAR.value: "left_ear",
-                mp_pose.PoseLandmark.RIGHT_EAR.value: "right_ear",
-                mp_pose.PoseLandmark.LEFT_SHOULDER.value: "shoulder_left",
-                mp_pose.PoseLandmark.RIGHT_SHOULDER.value: "shoulder_right",
-                mp_pose.PoseLandmark.LEFT_ELBOW.value: "elbow_left",
-                mp_pose.PoseLandmark.RIGHT_ELBOW.value: "elbow_right",
-                mp_pose.PoseLandmark.LEFT_WRIST.value: "wrist_left",
-                mp_pose.PoseLandmark.RIGHT_WRIST.value: "wrist_right",
-                mp_pose.PoseLandmark.LEFT_HIP.value: "hip_left",
-                mp_pose.PoseLandmark.RIGHT_HIP.value: "hip_right",
-                mp_pose.PoseLandmark.LEFT_KNEE.value: "knee_left",
-                mp_pose.PoseLandmark.RIGHT_KNEE.value: "knee_right",
-                mp_pose.PoseLandmark.LEFT_ANKLE.value: "ankle_left",
-                mp_pose.PoseLandmark.RIGHT_ANKLE.value: "ankle_right",
-                mp_pose.PoseLandmark.LEFT_HEEL.value: "heel_left",
-            	mp_pose.PoseLandmark.RIGHT_HEEL.value: "heel_right",
-            	mp_pose.PoseLandmark.LEFT_FOOT_INDEX.value: "foot_index_left",
-            	mp_pose.PoseLandmark.RIGHT_FOOT_INDEX.value: "foot_index_right"
-            }
+    # Define keypoint mappings for pose landmarks
+        keypoint_map = {
+            mp_pose.PoseLandmark.NOSE.value: "nose",
+            mp_pose.PoseLandmark.LEFT_EYE.value: "left_eye",
+            mp_pose.PoseLandmark.RIGHT_EYE.value: "right_eye",
+            mp_pose.PoseLandmark.LEFT_EAR.value: "left_ear",
+            mp_pose.PoseLandmark.RIGHT_EAR.value: "right_ear",
+            mp_pose.PoseLandmark.LEFT_SHOULDER.value: "shoulder_left",
+            mp_pose.PoseLandmark.RIGHT_SHOULDER.value: "shoulder_right",
+            mp_pose.PoseLandmark.LEFT_ELBOW.value: "elbow_left",
+            mp_pose.PoseLandmark.RIGHT_ELBOW.value: "elbow_right",
+            mp_pose.PoseLandmark.LEFT_WRIST.value: "wrist_left",
+            mp_pose.PoseLandmark.RIGHT_WRIST.value: "wrist_right",
+            mp_pose.PoseLandmark.LEFT_HIP.value: "hip_left",
+            mp_pose.PoseLandmark.RIGHT_HIP.value: "hip_right",
+            mp_pose.PoseLandmark.LEFT_KNEE.value: "knee_left",
+            mp_pose.PoseLandmark.RIGHT_KNEE.value: "knee_right",
+            mp_pose.PoseLandmark.LEFT_ANKLE.value: "ankle_left",
+            mp_pose.PoseLandmark.RIGHT_ANKLE.value: "ankle_right",
+            mp_pose.PoseLandmark.LEFT_HEEL.value: "heel_left",
+            mp_pose.PoseLandmark.RIGHT_HEEL.value: "heel_right",
+            mp_pose.PoseLandmark.LEFT_FOOT_INDEX.value: "foot_index_left",
+            mp_pose.PoseLandmark.RIGHT_FOOT_INDEX.value: "foot_index_right"
+        }
 
-            if idx in keypoint_map:
-                self.keypoints_data[keypoint_map[idx]].append([self.frame_counter, landmark.x, landmark.y, landmark.z])
+        # Only capture and store keypoints if detected and visible
+        for idx, key in keypoint_map.items():
+            # Check if the landmark index exists and meets the visibility threshold
+            if idx < len(landmarks) and landmarks[idx].visibility > 0.5:
+                landmark = landmarks[idx]
+                self.keypoints_data[key].append([self.frame_counter, landmark.x, landmark.y, landmark.z])
+            else:
+                # Skip recording for missing or invisible landmarks
+                print(f"{key} landmark missing or not visible in frame {self.frame_counter}")
+
+
+                
 
     def extract_hand_keypoints(self, hand_landmarks):
-        # Extract index and thumb fingertips
-        self.keypoints_data["left_index_finger_tip"].append(
-            [self.frame_counter, hand_landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP].x,
-             hand_landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP].y, 0]
-        )
-        self.keypoints_data["left_thumb_tip"].append(
-            [self.frame_counter, hand_landmarks[mp_hands.HandLandmark.THUMB_TIP].x,
-             hand_landmarks[mp_hands.HandLandmark.THUMB_TIP].y, 0]
-        )
+        # Define landmarks we want to record for each hand
+        required_landmarks = {
+            "left_index_finger_tip": mp_hands.HandLandmark.INDEX_FINGER_TIP,
+            "left_thumb_tip": mp_hands.HandLandmark.THUMB_TIP,
+            "right_index_finger_tip": mp_hands.HandLandmark.INDEX_FINGER_TIP,
+            "right_thumb_tip": mp_hands.HandLandmark.THUMB_TIP
+        }
+
+        for keypoint, landmark in required_landmarks.items():
+            # Check if the specific landmark is available
+            if landmark < len(hand_landmarks):  # Only add if landmark exists
+                x, y = hand_landmarks[landmark].x, hand_landmarks[landmark].y
+                z = 0  # Assuming 2D, so we set z to zero
+                self.keypoints_data[keypoint].append([self.frame_counter, x, y, z])
+            else:
+                # Optionally set to zero if landmark is not detected
+                self.keypoints_data[keypoint].append([self.frame_counter, 0, 0, 0])
+
 
     def save_keypoints_data(self):
         # Save the keypoints data to a .txt file

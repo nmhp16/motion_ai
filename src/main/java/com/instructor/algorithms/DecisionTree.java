@@ -6,6 +6,9 @@ public class DecisionTree {
 
     public DecisionTree() {
         // No need for a decision tree instance since we're comparing
+
+        //classifying as hard, easy, or difficult 
+        // 
     }
 
     /**
@@ -53,3 +56,5 @@ public class DecisionTree {
         return similarityScore < threshold ? "correct" : "incorrect";
     }
 }
+
+    

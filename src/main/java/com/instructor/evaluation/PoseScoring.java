@@ -84,6 +84,11 @@ public class PoseScoring {
 				// Check if the frame score is below the threshold
 				if (score < THRESHOLD_SCORE) {
 					// Store the frame as incorrect
+					// TODO: we need to add a clause if incorrect, then check if x y z are off and if x y z greater than or less than 
+					// if it is x : left or right 
+					// if it is y : up or down 
+					// if it is Z : front and back 
+					// when given an incorrect, then 
 					if (!incorrectFrames.containsKey(bodyPart)) {
 						incorrectFrames.put(bodyPart, new ArrayList<>());
 					}

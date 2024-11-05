@@ -5,15 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.instructor.data.PoseDataProcessing;
+import com.instructor.algorithms.DynamicTimeWarping;
 
 // TODO: COMPLETE TEST CODE
 public class PoseScoring {
 	private PoseFeedback feedback = new PoseFeedback();
-	private PoseDataProcessing poseDataProcessing = new PoseDataProcessing();
 	private List<Integer> scores = new ArrayList<>();
-	private int score;
-	private int averageScore;
+	private int score = 0;
+	private int overallScore = 0;
 
 	// Threshold for considering a pose as "wrong"
 	private static final int THRESHOLD_SCORE = 90;
@@ -53,51 +52,64 @@ public class PoseScoring {
 			Map<Integer, float[]> userPartData = userKeypoints.get(bodyPart);
 			Map<Integer, float[]> proPartData = proKeypoints.get(bodyPart);
 			scores = new ArrayList<>();
-			averageScore = 0;
 
+			// Check if there's user data and professional data for the body part
+			if (userPartData == null || proPartData == null) {
+				continue;
+			}
+
+			// Calculate DTW distance between user and professional keypoints for current
+			// body part
+			float totalDtwDistance = DynamicTimeWarping.dtw(userPartData, proPartData);
+			float maxDistance = 2.8f; // Replace actual value later
+
+			// Normalize score based on DTW distance
+			overallScore = calculateScore(totalDtwDistance, maxDistance); // Calculate score
+
+			// Evaluate frame by frame using DTW
 			for (Integer frame : userPartData.keySet()) {
-				float[] userData = userPartData.get(frame);
-				float[] proData = proPartData.get(frame);
+				Map<Integer, float[]> userSingleFrameData = new HashMap<>();
+				Map<Integer, float[]> proSingleFrameData = new HashMap<>();
 
-				if (proData != null) {
-					float distance = poseDataProcessing.calculateDistance(userData, proData);
-					float maxDistance = 4.0f; // TODO: Replace with actual distance later
-					score = calculateScore(distance, maxDistance); // Calculate score
-					scores.add(score); // Collect scores for output
+				// Add current frame data to single frame maps
+				userSingleFrameData.put(0, userPartData.get(frame));
+				proSingleFrameData.put(0, proPartData.get(frame));
 
-					// Calculate average score sum first
-					averageScore += score;
+				// Calculate DTW distance for the current frame vs corresponding professional
+				// frame
+				float frameDtwDistance = DynamicTimeWarping.dtw(userSingleFrameData, proSingleFrameData);
+				score = calculateScore(frameDtwDistance, maxDistance);
+				scores.add(score);
 
-					// Check if the score is below the threshold and add to incorrect frames
-					if (score < THRESHOLD_SCORE) {
-						// Store list of frame for incorrect pose
-						if (!incorrectFrames.containsKey(bodyPart)) {
-							incorrectFrames.put(bodyPart, new ArrayList<>());
-						}
-						incorrectFrames.get(bodyPart).add(frame);
-
-						// Store list of score for incorrect pose
-						if (!lowScoreFrames.containsKey(bodyPart)) {
-							lowScoreFrames.put(bodyPart, new ArrayList<>());
-						}
-						lowScoreFrames.get(bodyPart).add(score);
+				// Check if the frame score is below the threshold
+				if (score < THRESHOLD_SCORE) {
+					// Store the frame as incorrect
+					if (!incorrectFrames.containsKey(bodyPart)) {
+						incorrectFrames.put(bodyPart, new ArrayList<>());
 					}
+					incorrectFrames.get(bodyPart).add(frame); // Add the frame number
+
+					// Store the low score for this frame
+					if (!lowScoreFrames.containsKey(bodyPart)) {
+						lowScoreFrames.put(bodyPart, new ArrayList<>());
+					}
+					lowScoreFrames.get(bodyPart).add(score); // Add the low score
 				}
 			}
-			// Calculate average score
-			averageScore = averageScore / scores.size();
+
+			// Calculate overall score
 
 			if (isPartNeeded(bodyPart)) {
 				System.out.println("=================================================");
 				System.out.println("Body Part: " + bodyPart);
-				System.out.println("Average Score: " + averageScore);
+				System.out.println("Overall Score: " + overallScore);
 
 				// Provide feedback for the current frame
-				System.out.println(feedback.provideSpecificFeedback(averageScore, bodyPart));
+				System.out.println(feedback.provideSpecificFeedback(overallScore, bodyPart));
 				System.out.println();
 
 				// Check if there is bad score which < 90
-				if (lowScoreFrames.get(bodyPart) == null) {
+				if (lowScoreFrames.get(bodyPart) == null || lowScoreFrames.get(bodyPart).isEmpty()) {
 					System.out.println("Bad Scores: none");
 					System.out.println();
 				} else {

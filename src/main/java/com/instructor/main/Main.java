@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
+import com.instructor.algorithms.DynamicTimeWarping;
 import com.instructor.controller.ApplicationHandler;
 import com.instructor.controller.FileCleanup;
 import com.instructor.data.PoseDataProcessing;
@@ -119,12 +120,12 @@ public class Main {
 
                     // Calculate similarity score between user and pro based on total distance
                     // difference
-                    float similarityScore = poseDataProcessing.calculateSimilarity(userKeypointsMap, proKeypointsMap);
+                    float similarityScore = DynamicTimeWarping.totalDtw(userKeypointsMap, proKeypointsMap);
 
-                    // Assume max similarity
-                    float maxSimilarity = 4.0f; // Replace with actual value
+                    // Assume max similarity and calculate total score
+                    float maxSimilarity = 2.8f; // Replace with actual value
 
-                    // Calculate final score
+                    // DTW Score
                     int finalScore = poseScoring.calculateScore(similarityScore, maxSimilarity);
 
                     // Calculate body parts score and get feedback

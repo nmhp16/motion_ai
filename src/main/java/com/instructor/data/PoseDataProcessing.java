@@ -66,7 +66,7 @@ public class PoseDataProcessing {
 			}
 		}
 
-		// Return an inverse score or convert it to a 0-100 scale
+		// Return similarity between user and pro
 		if (matchingFrames > 0) {
 			return totalDistance / matchingFrames; // Lower score means more similarity
 		} else {
@@ -152,7 +152,7 @@ public class PoseDataProcessing {
 
 		// Iterate through each keypoint type in input data
 		for (String keypoint : keypoints.keySet()) {
-			Map<Integer, float[]> keypointFrames = keypoints.get(keypoint);
+			Map<Integer, float[]> keypointFrames = keypoints.getOrDefault(keypoint, new HashMap<>());
 			List<Integer> frames = new ArrayList<>(keypointFrames.keySet());
 			Collections.sort(frames); // TODO: Change with merge sort later
 

@@ -1,3 +1,0 @@
-user_9.txt
-user_10.txt
-user_11.txt

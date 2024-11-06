@@ -16,6 +16,9 @@ import javafx.scene.shape.Rectangle;
 
 public class DanceInstructorUI extends Application {
     
+    private Scene mainScene;
+    private Label recordingLabel = null;
+
     @Override
     public void start(Stage primaryStage) {
         
@@ -36,11 +39,24 @@ public class DanceInstructorUI extends Application {
         // Button Vbox
         VBox buttonVbox = new VBox(20);
         buttonVbox.setPadding(new Insets(15));
-        buttonVbox.setAlignment(Pos.TOP_LEFT);
+        buttonVbox.setAlignment(Pos.TOP_CENTER);
 
         // Button actions
-        startButton.setOnAction(e -> System.out.println("Starting recording..."));
-        stopButton.setOnAction(e -> System.out.println("Stopping recording..."));
+        startButton.setOnAction(e -> {
+            if (recordingLabel == null) {
+                recordingLabel = new Label("Starting recording...");
+                buttonVbox.getChildren().add(recordingLabel);
+            }
+        });
+        stopButton.setOnAction(e -> {
+            if (recordingLabel != null) {
+                recordingLabel.setText("Recording stopped");
+            }
+            else {
+                recordingLabel = new Label("Recording has not started, please start recording.");
+                buttonVbox.getChildren().add(recordingLabel);
+            }
+        });
         inputFileButton.setOnAction(e -> System.out.println("Inputting file..."));
 
         // Action for the Done button
@@ -54,8 +70,9 @@ public class DanceInstructorUI extends Application {
         // Add elements to main layout
         mainLayout.setCenter(cameraPane);
         mainLayout.setBottom(buttonBox);
+        mainLayout.setTop(buttonVbox);
 
-        Scene mainScene = new Scene(mainLayout, 600, 400);
+        mainScene = new Scene(mainLayout, 600, 400);
         
         // Set up the stage
         primaryStage.setTitle("Camera Input App");
@@ -72,8 +89,16 @@ public class DanceInstructorUI extends Application {
         
         // Label for feedback
         Label feedbackLabel = new Label("Feedback:");
+
+        // Back button
+        Button backButton = new Button("Back");
+
+        // Displays main scene
+        backButton.setOnAction(e -> {
+            stage.setScene(mainScene);
+        });
         
-        feedbackLayout.getChildren().add(feedbackLabel);
+        feedbackLayout.getChildren().addAll(backButton,feedbackLabel);
 
         Scene feedbackScene = new Scene(feedbackLayout, 600, 400);
         stage.setScene(feedbackScene);

@@ -10,7 +10,6 @@ import com.instructor.algorithms.DynamicTimeWarping;
 // TODO: COMPLETE TEST CODE
 public class PoseScoring {
 	private PoseFeedback feedback = new PoseFeedback();
-	private List<Integer> scores = new ArrayList<>();
 	private int score = 0;
 	private int overallScore = 0;
 
@@ -51,7 +50,6 @@ public class PoseScoring {
 		for (String bodyPart : userKeypoints.keySet()) {
 			Map<Integer, float[]> userPartData = userKeypoints.get(bodyPart);
 			Map<Integer, float[]> proPartData = proKeypoints.get(bodyPart);
-			scores = new ArrayList<>();
 
 			// Check if there's user data and professional data for the body part
 			if (userPartData == null || proPartData == null) {

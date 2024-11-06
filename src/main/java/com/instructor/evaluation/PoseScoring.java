@@ -15,7 +15,7 @@ public class PoseScoring {
 	private int overallScore = 0;
 
 	// Threshold for considering a pose as "wrong"
-	private static final int THRESHOLD_SCORE = 90;
+	private static final int THRESHOLD_SCORE = 80;
 
 	/**
 	 * Give score based on the similarity between User and Pro
@@ -58,41 +58,49 @@ public class PoseScoring {
 				continue;
 			}
 
-			// Calculate DTW distance between user and professional keypoints for current
-			// body part
-			float totalDtwDistance = DynamicTimeWarping.dtw(userPartData, proPartData);
-			float maxDistance = 2.8f; // Replace actual value later
+			// Calculate DTW and obtain the alignment path
+			List<int[]> alignmentPath = DynamicTimeWarping.dtwWithAlignmentPath(userPartData, proPartData);
 
-			// Normalize score based on DTW distance
-			overallScore = calculateScore(totalDtwDistance, maxDistance); // Calculate score
+			// Track overall score based on DTW distance
+			float totalDtwDistance = 0;
+			float maxDistance = 4.0f; // Replace actual value later
 
-			// Evaluate frame by frame using DTW
-			for (Integer frame : userPartData.keySet()) {
-				Map<Integer, float[]> userSingleFrameData = new HashMap<>();
-				Map<Integer, float[]> proSingleFrameData = new HashMap<>();
+			for (int[] path : alignmentPath) {
+				int userFrame = path[0];
+				int proFrame = path[1];
 
-				// Add current frame data to single frame maps
-				userSingleFrameData.put(0, userPartData.get(frame));
-				proSingleFrameData.put(0, proPartData.get(frame));
+				// Check for null values before creating the map
+				float[] userFrameData = userPartData.get(userFrame);
+				float[] proFrameData = proPartData.get(proFrame);
 
-				// Calculate DTW distance for the current frame vs corresponding professional
-				// frame
-				float frameDtwDistance = DynamicTimeWarping.dtw(userSingleFrameData, proSingleFrameData);
+				// Skip this frame if either user or pro frame data is null
+				if (userFrameData == null || proFrameData == null) {
+					continue;
+				}
+
+				// Calculate the DTW distance for this pair of frames
+				float frameDtwDistance = DynamicTimeWarping.dtw(
+						Map.of(0, userPartData.get(userFrame)),
+						Map.of(0, proPartData.get(proFrame)));
+
+				totalDtwDistance += frameDtwDistance;
 				score = calculateScore(frameDtwDistance, maxDistance);
-				scores.add(score);
 
-				// Check if the frame score is below the threshold
+				// Store low score frames
 				if (score < THRESHOLD_SCORE) {
 					// Store the frame as incorrect
-					// TODO: we need to add a clause if incorrect, then check if x y z are off and if x y z greater than or less than 
-					// if it is x : left or right 
-					// if it is y : up or down 
-					// if it is Z : front and back 
-					// when given an incorrect, then 
+					// TODO: we need to add a clause if incorrect, then check if x y z are off and
+					// if x y z greater than or less than
+					// if it is x : left or right
+					// if it is y : up or down
+					// if it is Z : front and back
+					// when given an incorrect, then
+
+					// Track frames with poor alignment
 					if (!incorrectFrames.containsKey(bodyPart)) {
 						incorrectFrames.put(bodyPart, new ArrayList<>());
 					}
-					incorrectFrames.get(bodyPart).add(frame); // Add the frame number
+					incorrectFrames.get(bodyPart).add(userFrame); // Add the frame number
 
 					// Store the low score for this frame
 					if (!lowScoreFrames.containsKey(bodyPart)) {
@@ -100,9 +108,14 @@ public class PoseScoring {
 					}
 					lowScoreFrames.get(bodyPart).add(score); // Add the low score
 				}
+
 			}
 
+			// Calculate average DTW distance
+			float averageDtwDistance = totalDtwDistance / alignmentPath.size();
+
 			// Calculate overall score
+			overallScore = calculateScore(averageDtwDistance, maxDistance);
 
 			if (isPartNeeded(bodyPart)) {
 				System.out.println("=================================================");

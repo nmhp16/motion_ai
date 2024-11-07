@@ -41,23 +41,29 @@ public class DanceInstructorUI extends Application {
         buttonVbox.setPadding(new Insets(15));
         buttonVbox.setAlignment(Pos.TOP_CENTER);
 
+        // Create recording label at top of screen
+        recordingLabel = new Label(" ");
+        buttonVbox.getChildren().add(recordingLabel);
+        
         // Button actions
         startButton.setOnAction(e -> {
-            if (recordingLabel == null) {
-                recordingLabel = new Label("Starting recording...");
-                buttonVbox.getChildren().add(recordingLabel);
+            if (!"Starting recording...".equals(recordingLabel.getText())) {
+                recordingLabel.setText("Starting recording...");
             }
         });
         stopButton.setOnAction(e -> {
-            if (recordingLabel != null) {
+            if (!"Recording stopped".equals(recordingLabel.getText())) {
                 recordingLabel.setText("Recording stopped");
             }
             else {
-                recordingLabel = new Label("Recording has not started, please start recording.");
-                buttonVbox.getChildren().add(recordingLabel);
+                recordingLabel.setText("Recording has not started, please start recording.");
             }
         });
-        inputFileButton.setOnAction(e -> System.out.println("Inputting file..."));
+        inputFileButton.setOnAction(e -> {
+            if (!"Inputting file...".equals((recordingLabel.getText()))) {
+                recordingLabel.setText("Inputting file...");
+            }
+        });
 
         // Action for the Done button
         doneButton.setOnAction(e -> showFeedbackScreen(primaryStage));

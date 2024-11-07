@@ -156,9 +156,8 @@ class PoseEstimationService:
             if idx < len(landmarks) and landmarks[idx].visibility > 0.5:
                 landmark = landmarks[idx]
                 self.keypoints_data[key].append([self.frame_counter, landmark.x, landmark.y, landmark.z])
-            else:
                 # Skip recording for missing or invisible landmarks
-                print(f"{key} landmark missing or not visible in frame {self.frame_counter}")
+                
 
 
                 

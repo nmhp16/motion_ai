@@ -1,6 +1,7 @@
 package com.instructor.main;
 
 import javafx.application.Application;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -15,13 +16,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class DanceInstructorUI extends Application {
-    
+
     private Scene mainScene;
     private Label recordingLabel = null;
 
     @Override
     public void start(Stage primaryStage) {
-        
+
         // Main Screen
         BorderPane mainLayout = new BorderPane();
 
@@ -44,7 +45,7 @@ public class DanceInstructorUI extends Application {
         // Create recording label at top of screen
         recordingLabel = new Label(" ");
         buttonVbox.getChildren().add(recordingLabel);
-        
+
         // Button actions
         startButton.setOnAction(e -> {
             if (!"Starting recording...".equals(recordingLabel.getText())) {
@@ -54,8 +55,7 @@ public class DanceInstructorUI extends Application {
         stopButton.setOnAction(e -> {
             if (!"Recording stopped".equals(recordingLabel.getText())) {
                 recordingLabel.setText("Recording stopped");
-            }
-            else {
+            } else {
                 recordingLabel.setText("Recording has not started, please start recording.");
             }
         });
@@ -79,7 +79,7 @@ public class DanceInstructorUI extends Application {
         mainLayout.setTop(buttonVbox);
 
         mainScene = new Scene(mainLayout, 600, 400);
-        
+
         // Set up the stage
         primaryStage.setTitle("Camera Input App");
         primaryStage.setScene(mainScene);
@@ -92,7 +92,7 @@ public class DanceInstructorUI extends Application {
         VBox feedbackLayout = new VBox(20);
         feedbackLayout.setAlignment(Pos.TOP_LEFT);
         feedbackLayout.setPadding(new Insets(20));
-        
+
         // Label for feedback
         Label feedbackLabel = new Label("Feedback:");
 
@@ -103,8 +103,8 @@ public class DanceInstructorUI extends Application {
         backButton.setOnAction(e -> {
             stage.setScene(mainScene);
         });
-        
-        feedbackLayout.getChildren().addAll(backButton,feedbackLabel);
+
+        feedbackLayout.getChildren().addAll(backButton, feedbackLabel);
 
         Scene feedbackScene = new Scene(feedbackLayout, 600, 400);
         stage.setScene(feedbackScene);

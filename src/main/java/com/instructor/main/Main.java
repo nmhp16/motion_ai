@@ -11,6 +11,7 @@ import com.instructor.controller.ApplicationHandler;
 import com.instructor.controller.FileCleanup;
 import com.instructor.data.PoseDataProcessing;
 import com.instructor.data.PoseDataReader;
+import com.instructor.evaluation.JointScoring;
 import com.instructor.evaluation.PoseFeedback;
 import com.instructor.evaluation.PoseScoring;
 
@@ -132,8 +133,11 @@ public class Main {
                     // Calculate body parts score and get feedback
                     poseScoring.calculatePoseScore(userKeypointsMap, proKeypointsMap);
 
+
+
                     //TODO: add the new fuction call to run joint movement analysis check
                     //This will be for the joints
+                    JointScoring.generateFeedbackForAllJoints(userKeypointsMap, proKeypointsMap);
 
                     // Output similarity score and final score overall
                     System.out.println();

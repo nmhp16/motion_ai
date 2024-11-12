@@ -6,7 +6,7 @@ import com.instructor.algorithms.DynamicTimeWarping;
 
 public class JointScoring {
     	//TODO: these are values that we need to test for so that we can implement it accurately
-    private static final float THRESHOLD = 0.01f;
+    private static final float THRESHOLD = 0.2f;
     private static final float DTW_THRESHOLD = 0.05f;
 
     // Function to get feedback for joint movement
@@ -50,4 +50,39 @@ public class JointScoring {
             return "Pose is sufficiently aligned for " + jointName + " in this frame.\n";
         }
     }
+
+    public static void generateFeedbackForAllJoints(Map<String, Map<Integer, float[]>> userDatabase, Map<String, Map<Integer, float[]>> proDatabase) {
+        // Iterate through each joint in the user's database
+        for (Map.Entry<String, Map<Integer, float[]>> entry : userDatabase.entrySet()) {
+            String jointName = entry.getKey();
+            Map<Integer, float[]> userFrames = entry.getValue();
+
+            // Get corresponding pro frames for the joint
+            Map<Integer, float[]> proFrames = proDatabase.get(jointName);
+
+            if (proFrames != null) {
+                // For each frame in the user's data, compare it with the corresponding pro frame
+                for (Map.Entry<Integer, float[]> frameEntry : userFrames.entrySet()) {
+                    Integer frameIndex = frameEntry.getKey();
+                    float[] userFrameData = frameEntry.getValue();
+                    float[] proFrameData = proFrames.get(frameIndex);
+
+                    // If there's no corresponding pro frame for this index, skip
+                    if (proFrameData == null) {
+                        continue;
+                    }
+
+                    // Get the feedback for the joint and frame
+                    String feedback = compareFramesAndProvideFeedback(jointName, userFrameData, proFrameData);
+
+                    // Print the feedback (or store it as required)
+                    System.out.println("Feedback for joint: " + jointName + ", Frame: " + frameIndex);
+                    System.out.println(feedback);
+                }
+            } else {
+                System.out.println("No pro data found for joint: " + jointName);
+            }
+        }
+    }
+    
 }

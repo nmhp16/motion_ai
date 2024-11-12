@@ -1,6 +1,7 @@
 package com.instructor.main;
 
 import javafx.application.Application;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -15,10 +16,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class DanceInstructorUI extends Application {
-    
+
+    private Scene mainScene;
+    private Label recordingLabel = null;
+
     @Override
     public void start(Stage primaryStage) {
-        
+
         // Main Screen
         BorderPane mainLayout = new BorderPane();
 
@@ -36,12 +40,30 @@ public class DanceInstructorUI extends Application {
         // Button Vbox
         VBox buttonVbox = new VBox(20);
         buttonVbox.setPadding(new Insets(15));
-        buttonVbox.setAlignment(Pos.TOP_LEFT);
+        buttonVbox.setAlignment(Pos.TOP_CENTER);
+
+        // Create recording label at top of screen
+        recordingLabel = new Label(" ");
+        buttonVbox.getChildren().add(recordingLabel);
 
         // Button actions
-        startButton.setOnAction(e -> System.out.println("Starting recording..."));
-        stopButton.setOnAction(e -> System.out.println("Stopping recording..."));
-        inputFileButton.setOnAction(e -> System.out.println("Inputting file..."));
+        startButton.setOnAction(e -> {
+            if (!"Starting recording...".equals(recordingLabel.getText())) {
+                recordingLabel.setText("Starting recording...");
+            }
+        });
+        stopButton.setOnAction(e -> {
+            if (!"Recording stopped".equals(recordingLabel.getText())) {
+                recordingLabel.setText("Recording stopped");
+            } else {
+                recordingLabel.setText("Recording has not started, please start recording.");
+            }
+        });
+        inputFileButton.setOnAction(e -> {
+            if (!"Inputting file...".equals((recordingLabel.getText()))) {
+                recordingLabel.setText("Inputting file...");
+            }
+        });
 
         // Action for the Done button
         doneButton.setOnAction(e -> showFeedbackScreen(primaryStage));
@@ -54,9 +76,10 @@ public class DanceInstructorUI extends Application {
         // Add elements to main layout
         mainLayout.setCenter(cameraPane);
         mainLayout.setBottom(buttonBox);
+        mainLayout.setTop(buttonVbox);
 
-        Scene mainScene = new Scene(mainLayout, 600, 400);
-        
+        mainScene = new Scene(mainLayout, 600, 400);
+
         // Set up the stage
         primaryStage.setTitle("Camera Input App");
         primaryStage.setScene(mainScene);
@@ -69,11 +92,19 @@ public class DanceInstructorUI extends Application {
         VBox feedbackLayout = new VBox(20);
         feedbackLayout.setAlignment(Pos.TOP_LEFT);
         feedbackLayout.setPadding(new Insets(20));
-        
+
         // Label for feedback
         Label feedbackLabel = new Label("Feedback:");
-        
-        feedbackLayout.getChildren().add(feedbackLabel);
+
+        // Back button
+        Button backButton = new Button("Back");
+
+        // Displays main scene
+        backButton.setOnAction(e -> {
+            stage.setScene(mainScene);
+        });
+
+        feedbackLayout.getChildren().addAll(backButton, feedbackLabel);
 
         Scene feedbackScene = new Scene(feedbackLayout, 600, 400);
         stage.setScene(feedbackScene);

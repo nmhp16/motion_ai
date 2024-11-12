@@ -112,8 +112,9 @@ public class Main {
                 case 0: // Test
                     // Load keypoints from files
                     userKeypointsMap = poseDataReader
-                            .readKeypointsFromFile("user_4.txt");
-                    proKeypointsMap = poseDataReader.readKeypointsFromFile("user_5.txt");
+                            .readKeypointsFromFile("./motion_database/ballet_spin/beginner.txt");
+                    proKeypointsMap = poseDataReader
+                            .readKeypointsFromFile("./motion_database/ballet_spin/pro.txt");
 
                     userKeypointsMap = poseDataProcessing.processPoseData(userKeypointsMap);
                     proKeypointsMap = poseDataProcessing.processPoseData(proKeypointsMap);
@@ -123,7 +124,7 @@ public class Main {
                     float similarityScore = DynamicTimeWarping.totalDtw(userKeypointsMap, proKeypointsMap);
 
                     // Assume max similarity and calculate total score
-                    float maxSimilarity = 2.8f; // Replace with actual value
+                    float maxSimilarity = 4.0f; // Replace with actual value
 
                     // DTW Score
                     int finalScore = poseScoring.calculateScore(similarityScore, maxSimilarity);

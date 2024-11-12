@@ -79,8 +79,6 @@ class PoseEstimationService:
                 print("End of video or failed to read frame.")
                 break
 
-            # Create a blank frame for drawing keypoints
-            blank_frame = np.zeros((frame_height, frame_width, 3), dtype=np.uint8)
             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image.flags.writeable = False
 
@@ -90,30 +88,27 @@ class PoseEstimationService:
             hand_results = self.hands.process(image)
 
             if pose_results.pose_landmarks:
-                # Draw keypoints and connections on the blank frame (keypoints only, no original frame)
-                mp_drawing.draw_landmarks(
-                    blank_frame, 
-                    pose_results.pose_landmarks, 
-                    mp_pose.POSE_CONNECTIONS,
-                    mp_drawing.DrawingSpec(color=(255, 255, 255), thickness=2, circle_radius=2),  # Keypoints
-                    mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2)  # Connections
-                )
+                # Draw pose landmarks on the image
+                mp.solutions.drawing_utils.draw_landmarks(frame, pose_results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
                 self.extract_pose_keypoints(pose_results.pose_landmarks.landmark)
 
             if hand_results.multi_hand_landmarks:
-                for hand_landmarks in hand_results.multi_hand_landmarks:
-                    mp_drawing.draw_landmarks(
-                        blank_frame, hand_landmarks, mp_hands.HAND_CONNECTIONS,
-                        mp_drawing.DrawingSpec(color=(255, 255, 255), thickness=2, circle_radius=2),
-                        mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2)
-                    )
-                    self.extract_hand_keypoints(hand_landmarks.landmark)
+                for hand_index, hand_landmarks in enumerate(hand_results.multi_hand_landmarks):
+                    # Determine if the hand is left or right
+                    hand_label = hand_results.multi_handedness[hand_index].classification[0].label
+                    hand_type = "left" if hand_label == "Left" else "right"
 
-            # Write the keypoints frame (blank_frame) to the output video file
-            out.write(blank_frame)
+                    # Draw hand landmarks on image
+                    mp.solutions.drawing_utils.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+
+                    # Call extract_hand_keypoints with the correct hand landmarks and hand type
+                    self.extract_hand_keypoints(hand_landmarks, hand_type)
+
+            # Write the keypoints frame (frame) to the output video file
+            out.write(frame)
 
             # Display the keypoints-only frame
-            cv2.imshow('Keypoints Line Video', blank_frame)
+            cv2.imshow('Keypoints Line Video', frame)
 
             if cv2.waitKey(5) & 0xFF == 27:  # Press 'ESC' to exit
                 break
@@ -128,6 +123,7 @@ class PoseEstimationService:
         self.save_keypoints_data()  # Save keypoints data to a text file
 
     def extract_pose_keypoints(self, landmarks):
+    # Define keypoint mappings for pose landmarks
         keypoint_map = {
             mp_pose.PoseLandmark.NOSE.value: "nose",
             mp_pose.PoseLandmark.LEFT_EYE.value: "left_eye",
@@ -151,20 +147,26 @@ class PoseEstimationService:
             mp_pose.PoseLandmark.LEFT_FOOT_INDEX.value: "foot_index_left",
             mp_pose.PoseLandmark.RIGHT_FOOT_INDEX.value: "foot_index_right"
         }
-        for idx, landmark in enumerate(landmarks):
-            if idx in keypoint_map:
-                self.keypoints_data[keypoint_map[idx]].append([self.frame_counter, landmark.x, landmark.y, landmark.z])
 
-    def extract_hand_keypoints(self, hand_landmarks):
-        # Extract index and thumb fingertips
-        self.keypoints_data["left_index_finger_tip"].append(
-            [self.frame_counter, hand_landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP].x,
-             hand_landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP].y, 0]
-        )
-        self.keypoints_data["left_thumb_tip"].append(
-            [self.frame_counter, hand_landmarks[mp_hands.HandLandmark.THUMB_TIP].x,
-             hand_landmarks[mp_hands.HandLandmark.THUMB_TIP].y, 0]
-        )
+        # Only capture and store keypoints if detected and visible
+        for idx, key in keypoint_map.items():
+            # Check if the landmark index exists and meets the visibility threshold
+            if idx < len(landmarks) and landmarks[idx].visibility > 0.5:
+                landmark = landmarks[idx]
+                self.keypoints_data[key].append([self.frame_counter, landmark.x, landmark.y, landmark.z])
+
+    def extract_hand_keypoints(self, hand_landmarks, hand_type):
+        # Define required landmarks with keys for both hands
+        required_landmarks = {
+            f"{hand_type}_index_finger_tip": mp.solutions.hands.HandLandmark.INDEX_FINGER_TIP,
+            f"{hand_type}_thumb_tip": mp.solutions.hands.HandLandmark.THUMB_TIP,
+        }
+
+        for keypoint, landmark in required_landmarks.items():
+            # Check if landmark index exists
+            if landmark < len(hand_landmarks.landmark):
+                x, y, z = hand_landmarks.landmark[landmark].x, hand_landmarks.landmark[landmark].y, hand_landmarks.landmark[landmark].z
+                self.keypoints_data[keypoint].append([self.frame_counter, x, y, z])
 
     def save_keypoints_data(self):
         with open(self.keypoints_file, 'w') as f:

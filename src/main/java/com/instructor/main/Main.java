@@ -132,6 +132,9 @@ public class Main {
                     // Calculate body parts score and get feedback
                     poseScoring.calculatePoseScore(userKeypointsMap, proKeypointsMap);
 
+                    //TODO: add the new fuction call to run joint movement analysis check
+                    //This will be for the joints
+
                     // Output similarity score and final score overall
                     System.out.println();
 

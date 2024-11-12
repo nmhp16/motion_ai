@@ -162,7 +162,13 @@ class PoseEstimationService:
             # Check if the landmark index exists and meets the visibility threshold
             if idx < len(landmarks) and landmarks[idx].visibility > 0.5:
                 landmark = landmarks[idx]
+<<<<<<< HEAD
+                self.keypoints_data[key].append([self.frame_counter, landmark.x, landmark.y, landmark.z])
+                # Skip recording for missing or invisible landmarks
+                
+=======
                 self.keypoints_data[key].append([self.frame_counter, landmark.x, landmark.y, landmark.z]) 
+>>>>>>> 18e28a759fbc9a05fdd8c6fd5a31dfb6678f108f
 
     def extract_hand_keypoints(self, hand_landmarks, hand_type):
         # Define required landmarks with keys for both hands

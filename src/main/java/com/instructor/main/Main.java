@@ -15,6 +15,8 @@ import com.instructor.evaluation.PoseFeedback;
 import com.instructor.evaluation.PoseScoring;
 
 public class Main {
+
+    
     public static void main(String[] args) {
         // Initialize FileCleanup to clean up saved filenames
         FileCleanup fileCleanup = new FileCleanup();
@@ -83,7 +85,8 @@ public class Main {
 
                     // Allow user to upload video to be compared
                     handler.runUploadPoseEstimation(userFile, "Beginner");
-
+                    //handler.runUploadPoseEstimation(userFile, "Pro");
+                    
                     // Update user history
                     fileCleanup.updateSavedFilenamesFile();
 

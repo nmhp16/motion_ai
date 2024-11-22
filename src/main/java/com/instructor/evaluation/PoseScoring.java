@@ -162,4 +162,5 @@ public class PoseScoring {
 				|| bodyPart.equalsIgnoreCase("foot_index_left") || bodyPart.equalsIgnoreCase("foot_index_right")
 				|| bodyPart.equalsIgnoreCase("nose");
 	}
+
 }

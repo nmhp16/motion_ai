@@ -1,169 +1,155 @@
 package com.instructor.algorithms;
 
-import java.util.Map;
-import java.util.ArrayList;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import com.instructor.data.PoseDataProcessing;
 
 public class DynamicTimeWarping {
+
     /**
-     * Calculate the DTW distance between 2 sequences of keypoints
-     * 
-     * @param userKeypoints Map of user keypoints across frames
-     * @param proKeypoints  Map of pro keypoints across frames
-     * @return DTW distance (lower is better)
+     * Calculates the total Dynamic Time Warping (DTW) distance between two sets of
+     * keypoints for all body parts.
+     *
+     * @param userKeypoints Map of user keypoints, with body parts as keys and
+     *                      frames as values.
+     * @param proKeypoints  Map of professional keypoints, with body parts as keys
+     *                      and frames as values.
+     * @return The total DTW distance between the two sets of keypoints.
      */
     public static float totalDtw(Map<String, Map<Integer, float[]>> userKeypoints,
             Map<String, Map<Integer, float[]>> proKeypoints) {
         float totalDtwDistance = 0;
         int partCount = 0;
 
-        // Loop through each body part
         for (String keypoint : userKeypoints.keySet()) {
             Map<Integer, float[]> userPartData = userKeypoints.getOrDefault(keypoint, new HashMap<>());
             Map<Integer, float[]> proPartData = proKeypoints.getOrDefault(keypoint, new HashMap<>());
 
-            if (userPartData != null && proPartData != null) {
-                float dtwDistance = dtw(userPartData, proPartData); // Call the individual body part dtw method
+            if (!userPartData.isEmpty() && !proPartData.isEmpty()) {
+                float dtwDistance = dtw(userPartData, proPartData);
                 totalDtwDistance += dtwDistance;
                 partCount++;
             }
         }
 
-        // Return DTW similarity by averaging the dtwDistance (lower is better)
-        if (partCount > 0) {
-            return totalDtwDistance / partCount; // Lower similarity mean higher score
-        } else {
-            return Float.MAX_VALUE; // No matching frames, return high "distance"
-        }
+        return partCount > 0 ? totalDtwDistance / partCount : Float.MAX_VALUE;
     }
 
     /**
-     * Calculate the DTW distance between 2 sequences of keypoints for specific body
-     * part.
+     * Computes the Dynamic Time Warping (DTW) distance between two sets of keypoint
+     * data.
      * 
-     * @param userPartData Map of user keypoints for a specific body part across
-     *                     frames
-     * @param proPartData  Map of professional keypoints for a specific body part
-     *                     across frames
-     * @return DTW distance (lower is better)
+     * This method calculates the DTW distance matrix and returns the normalized
+     * cumulative distance between frames of user and professional keypoints.
+     * 
+     * @param userPartData A map of frame indices to keypoint coordinates for the
+     *                     user.
+     * @param proPartData  A map of frame indices to keypoint coordinates for the
+     *                     professional.
+     * @return The normalized DTW distance representing the similarity between the
+     *         two datasets.
      */
     public static float dtw(Map<Integer, float[]> userPartData, Map<Integer, float[]> proPartData) {
         PoseDataProcessing poseDataProcessing = new PoseDataProcessing();
 
-        int n = userPartData.size(); // Number of frames in user pose sequence
-        int m = proPartData.size(); // Number of frames in pro pose sequence
+        // Use sorted keys to access data consistently
+        List<Integer> userKeys = new ArrayList<>(userPartData.keySet());
+        List<Integer> proKeys = new ArrayList<>(proPartData.keySet());
+        Collections.sort(userKeys); // TODO: Can change with merge sort later
+        Collections.sort(proKeys); // TODO: Can change with merge sort later
 
-        // Initialize the DTW matrix
+        int n = userKeys.size();
+        int m = proKeys.size();
+
         float[][] dtwMatrix = new float[n + 1][m + 1];
-
-        // Fill the matrix with high values (infinity) except starting point
-        for (int i = 1; i <= n; i++) {
-            for (int j = 1; j <= m; j++) {
-                dtwMatrix[i][j] = Float.MAX_VALUE;
-            }
+        for (int i = 0; i <= n; i++) {
+            Arrays.fill(dtwMatrix[i], Float.MAX_VALUE);
         }
         dtwMatrix[0][0] = 0;
 
-        // Calculate DTW cost
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= m; j++) {
-                float[] userCoords = userPartData.get(i - 1);
-                float[] proCoords = proPartData.get(j - 1);
+                float[] userCoords = userPartData.get(userKeys.get(i - 1));
+                float[] proCoords = proPartData.get(proKeys.get(j - 1));
 
                 float cost = 0;
                 if (userCoords != null && proCoords != null) {
                     cost = poseDataProcessing.calculateDistance(userCoords, proCoords);
                 }
 
-                // Add the cost to the optimal path cost to this cell
                 dtwMatrix[i][j] = cost + Math.min(
-                        Math.min(dtwMatrix[i - 1][j], dtwMatrix[i][j - 1]), // Vertical or Horizontal
-                        dtwMatrix[i - 1][j - 1]); // Diagonal
+                        Math.min(dtwMatrix[i - 1][j], dtwMatrix[i][j - 1]),
+                        dtwMatrix[i - 1][j - 1]);
             }
         }
-        // Return DTW distance normalized by the length of the path
+
         return dtwMatrix[n][m] / Math.max(n, m);
     }
 
     /**
-     * Method to check for the aligned frame using Dynamic Time Warping
-     * Calculates optimal alignment path between user and pro
-     * keypoints for specific body part across frames
+     * Calculates the Dynamic Time Warping (DTW) distance between two sets of
+     * keypoints, as well as the alignment path that produces the minimum DTW
+     * distance.
      * 
-     * @param userPartData Map of user keypoints for a specific body part across
-     *                     frames
-     * @param proPartData  Map of pro keypoints for a specific body part across
-     *                     frames
-     * @return List of aligned frames (each frame represented as pair of user and
-     *         pro frame)
+     * @param userPartData Map containing the keypoints data for the user, with
+     *                     frames as keys and coordinates as values.
+     * @param proPartData  Map containing the keypoints data for the professional
+     *                     dancer, with frames as keys and coordinates as values.
+     * @return A list of int[] arrays, where each array contains the frame numbers
+     *         for the user and professional keypoints, respectively, that align
+     *         together in the DTW path. The first element of the array is the
+     *         user frame, and the second element is the professional frame.
      */
     public static List<int[]> dtwWithAlignmentPath(Map<Integer, float[]> userPartData,
             Map<Integer, float[]> proPartData) {
-        // Create instance of PoseDataProcessing to calculate distances
         PoseDataProcessing poseDataProcessing = new PoseDataProcessing();
 
-        // Get the number of frames for user and pro poses
-        int n = userPartData.size(); // Number of frames in user pose sequence
-        int m = proPartData.size(); // Number of frames in pro pose sequence
+        List<Integer> userKeys = new ArrayList<>(userPartData.keySet());
+        List<Integer> proKeys = new ArrayList<>(proPartData.keySet());
+        Collections.sort(userKeys);
+        Collections.sort(proKeys);
 
-        // Initialize the DTW Matrix
+        int n = userKeys.size();
+        int m = proKeys.size();
+
         float[][] dtwMatrix = new float[n + 1][m + 1];
-        int[][] pathMatrix = new int[n + 1][m + 1]; // Store the path for backtracking
+        int[][] pathMatrix = new int[n][m];
 
-        // Fill the matrix with high values (infinity) except starting point
-        for (int i = 1; i <= n; i++) {
-            for (int j = 1; j <= m; j++) {
-                dtwMatrix[i][j] = Float.MAX_VALUE;
-            }
+        for (int i = 0; i <= n; i++) {
+            Arrays.fill(dtwMatrix[i], Float.MAX_VALUE);
         }
-        dtwMatrix[0][0] = 0; // Starting point
+        dtwMatrix[0][0] = 0;
 
-        // Calculate DTW cost and track the optimal path
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= m; j++) {
-                // Get coordinates for user and pro frames
-                float[] userCoords = userPartData.get(i - 1);
-                float[] proCoords = proPartData.get(j - 1);
+                float[] userCoords = userPartData.get(userKeys.get(i - 1));
+                float[] proCoords = proPartData.get(proKeys.get(j - 1));
 
-                // Calculate distance (cost) between user and pro frame
                 float cost = 0;
                 if (userCoords != null && proCoords != null) {
                     cost = poseDataProcessing.calculateDistance(userCoords, proCoords);
                 }
 
-                // Find the minimum cost for this cell
                 float minCost = Math.min(
-                        Math.min(dtwMatrix[i - 1][j], dtwMatrix[i][j - 1]), // Vertical or Horizontal
-                        dtwMatrix[i - 1][j - 1] // Diagonal
-                );
-
-                // Update the dtwMatrix and track path
+                        Math.min(dtwMatrix[i - 1][j], dtwMatrix[i][j - 1]),
+                        dtwMatrix[i - 1][j - 1]);
                 dtwMatrix[i][j] = cost + minCost;
 
-                // Track the direction of the move
-                if (dtwMatrix[i][j] == (cost + dtwMatrix[i - 1][j])) {
-                    pathMatrix[i][j] = 1; // Vertical move
-                } else if (dtwMatrix[i][j] == (cost + dtwMatrix[i][j - 1])) {
-                    pathMatrix[i][j] = 2; // Horizontal move
+                if (minCost == dtwMatrix[i - 1][j]) {
+                    pathMatrix[i - 1][j - 1] = 1; // Vertical
+                } else if (minCost == dtwMatrix[i][j - 1]) {
+                    pathMatrix[i - 1][j - 1] = 2; // Horizontal
                 } else {
-                    pathMatrix[i][j] = 3; // Diagonal move
+                    pathMatrix[i - 1][j - 1] = 3; // Diagonal
                 }
             }
         }
 
-        // Backtrack to find the optimal path
         List<int[]> alignmentPath = new ArrayList<>();
-        int i = n, j = m;
+        int i = n - 1, j = m - 1;
 
-        while (i > 0 && j > 0) {
-            alignmentPath.add(new int[] { i - 1, j - 1 }); // Add aligned indices (user frame, pro frame)
-
-            // Move according to the path direction
+        while (i >= 0 && j >= 0) {
+            alignmentPath.add(new int[] { userKeys.get(i), proKeys.get(j) });
             if (pathMatrix[i][j] == 1) {
                 i--;
             } else if (pathMatrix[i][j] == 2) {
@@ -174,8 +160,7 @@ public class DynamicTimeWarping {
             }
         }
 
-        // Reverse the path to start from beginning
-        Collections.reverse(alignmentPath); // TODO: Replace with Merge Sort later
+        Collections.reverse(alignmentPath); // TODO: Replace with merge sort
         return alignmentPath;
     }
 }

@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 public class PoseDataProcessing {
+
+	// Define a constant for the maximum gap threshold (e.g., 10 frames)
+	private static final int MAX_GAP_THRESHOLD = 10;
+
 	/**
 	 * Normalize keypoints so people of different body sizes are compared correctly.
 	 *
@@ -130,11 +134,16 @@ public class PoseDataProcessing {
 	private float calculateTorsoLength(Map<String, Map<Integer, float[]>> keypoints, int frame) {
 		float[] shoulderLeft = keypoints.getOrDefault("shoulder_left", new HashMap<>()).get(frame);
 		float[] hipLeft = keypoints.getOrDefault("hip_left", new HashMap<>()).get(frame);
+		float[] shoulderRight = keypoints.getOrDefault("shoulder_right", new HashMap<>()).get(frame);
+		float[] hipRight = keypoints.getOrDefault("hip_right", new HashMap<>()).get(frame);
 
+		// Calculate torso length using fallback options
 		if (shoulderLeft != null && hipLeft != null) {
 			return calculateDistance(shoulderLeft, hipLeft);
+		} else if (shoulderRight != null && hipRight != null) {
+			return calculateDistance(shoulderRight, hipRight);
 		}
-		return 0;
+		return 0; // Return 0 if no valid torso keypoints found
 	}
 
 	/**
@@ -165,15 +174,53 @@ public class PoseDataProcessing {
 				float[] startCoords = keypointFrames.get(startFrame); // Coordinates for startFrame
 				float[] endCoords = keypointFrames.get(endFrame); // Coordinates for endFrame
 
+				// Skip long gaps that exceed the maximum gap threshold
+				if (endFrame - startFrame > MAX_GAP_THRESHOLD) {
+					continue; // Skip interpolation for long gaps
+				}
+
 				// Validate coordinates before proceeding
 				if (areValidCoordinates(startCoords, endCoords)) {
 					interpolateMissingFrames(interpolatedFrames, startFrame, endFrame, startCoords, endCoords);
 				}
 			}
+
+			// Handle edge frames (first and last frame) by extrapolation or use of the
+			// first/last known frame
+			handleEdgeFrames(frames, keypointFrames, interpolatedFrames);
+
 			// Add completed map with interpolated values
 			cleanedKeypoints.put(keypoint, interpolatedFrames);
 		}
 		return cleanedKeypoints; // Return map of keypoints with interpolated data for missing frames
+	}
+
+	/**
+	 * Handle edge frames in the interpolation process by extrapolating the first
+	 * and
+	 * last frames if they are missing. This is necessary because the interpolation
+	 * algorithm doesn't know how to handle the edge frames, and it should be set to
+	 * the same value as the closest frame it knows about.
+	 * 
+	 * @param frames             List of all frames
+	 * @param keypointFrames     Map of keypoints across frames
+	 * @param interpolatedFrames Map of keypoints with interpolated data for missing
+	 *                           frames
+	 */
+	private void handleEdgeFrames(List<Integer> frames, Map<Integer, float[]> keypointFrames,
+			Map<Integer, float[]> interpolatedFrames) {
+		int firstFrame = frames.get(0);
+		int lastFrame = frames.get(frames.size() - 1);
+
+		// Extrapolate the first frame if necessary
+		if (!interpolatedFrames.containsKey(firstFrame)) {
+			interpolatedFrames.put(firstFrame, keypointFrames.get(firstFrame));
+		}
+
+		// Extrapolate the last frame if necessary
+		if (!interpolatedFrames.containsKey(lastFrame)) {
+			interpolatedFrames.put(lastFrame, keypointFrames.get(lastFrame));
+		}
 	}
 
 	/**
@@ -203,18 +250,18 @@ public class PoseDataProcessing {
 
 			// Check if this frame already has coordinates
 			if (interpolatedFrames.containsKey(j)) {
-				continue; // Skip this frame
+				continue;
 			}
 
-			float fraction = (float) (j - startFrame) / (endFrame - startFrame); // Fractional position in the
-																					// gap
-			float[] interpolatedCoords = new float[3]; // (x, y, z) coordinates
-
-			// Interpolate each coordinate based on fraction
-			for (int k = 0; k < 3; k++) {
-				interpolatedCoords[k] = startCoords[k] + fraction * (endCoords[k] - startCoords[k]);
+			// Linear interpolation between startCoords and endCoords for the current frame
+			float[] interpolatedCoords = new float[3];
+			for (int i = 0; i < 3; i++) {
+				interpolatedCoords[i] = startCoords[i]
+						+ (endCoords[i] - startCoords[i]) * ((float) (j - startFrame) / (endFrame - startFrame));
 			}
-			interpolatedFrames.put(j, interpolatedCoords); // Add interpolated coordinates for frame j
+
+			// Add interpolated coordinates to map for this frame
+			interpolatedFrames.put(j, interpolatedCoords);
 		}
 	}
 
@@ -314,8 +361,6 @@ public class PoseDataProcessing {
 
 		// Normalize the cleaned keypoints for both user and pro
 		processedMap = normalizeKeypoints(processedMap);
-
-		// TODO: Calculate DTW Score
 
 		return processedMap;
 	}

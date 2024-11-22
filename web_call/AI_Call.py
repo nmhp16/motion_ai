@@ -6,7 +6,7 @@ class AI_call:
         genai.configure(api_key="AIzaSyBcbKOXuePtMGvotNgYHwl6Fnlk-U2eJJU")
         model = genai.GenerativeModel("gemini-1.5-flash")
         response = model.generate_content(prompt)
-        print(response.text) # Print result to output
+        print(response.text, flush=True) # Print result to output
 
 if __name__ == "__main__":
     # Read the prompt passed from Java

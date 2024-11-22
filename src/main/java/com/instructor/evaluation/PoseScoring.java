@@ -14,7 +14,7 @@ public class PoseScoring {
 	private int overallScore = 0;
 
 	// Threshold for considering a pose as "wrong"
-	private static final int THRESHOLD_SCORE = 80;
+	private static final int THRESHOLD_SCORE = 70;
 
 	/**
 	 * Give score based on the similarity between User and Pro
@@ -86,13 +86,6 @@ public class PoseScoring {
 
 				// Store low score frames
 				if (score < THRESHOLD_SCORE) {
-					// Store the frame as incorrect
-					// TODO: we need to add a clause if incorrect, then check if x y z are off and
-					// if x y z greater than or less than
-					// if it is x : left or right
-					// if it is y : up or down
-					// if it is Z : front and back
-					// when given an incorrect, then
 
 					// Track frames with poor alignment
 					if (!incorrectFrames.containsKey(bodyPart)) {
@@ -184,7 +177,6 @@ public class PoseScoring {
 
 		// Track alignment frames between user and pro keypoints
 		Map<String, List<int[]>> alignmentFrames = new HashMap<>();
-
 		StringBuilder prompt = new StringBuilder();
 
 		for (String bodyPart : userKeypoints.keySet()) {
@@ -204,9 +196,7 @@ public class PoseScoring {
 			List<int[]> alignmentPath = DynamicTimeWarping.dtwWithAlignmentPath(userPartData, proPartData);
 			alignmentFrames.put(bodyPart, alignmentPath);
 
-			prompt.append("Body Part: ").append(bodyPart).append("\n");
-
-			// Append aligned frames
+			// Iterate over the aligned frames to generate the comparison
 			for (int[] path : alignmentPath) {
 				int userFrame = path[0];
 				int proFrame = path[1];
@@ -218,15 +208,26 @@ public class PoseScoring {
 					continue;
 				}
 
-				prompt.append(String.format("User Frame: %d", userFrame));
-				prompt.append(
-						String.format("  User: x=%.4f, y=%.4f, z=%.4f\n", userFrameData[0], userFrameData[1],
-								userFrameData[2]));
+				// Calculate the DTW distance and score for the current frame
+				float frameDtwDistance = DynamicTimeWarping.dtw(
+						Map.of(0, userPartData.get(userFrame)),
+						Map.of(0, proPartData.get(proFrame)));
+				int score = calculateScore(frameDtwDistance, 4.0f); // Max distance of 4.0f (adjust if needed)
 
-				prompt.append(String.format("Pro Frame: %d\n", proFrame));
-				prompt.append(
-						String.format("  Pro:  x=%.4f, y=%.4f, z=%.4f\n\n", proFrameData[0], proFrameData[1],
-								proFrameData[2]));
+				// Only append to the prompt if the score is below 80
+				if (score < THRESHOLD_SCORE) {
+					if (prompt.length() == 0) {
+						prompt.append("Body Part: ").append(bodyPart).append("\n");
+					}
+
+					prompt.append(String.format("User Frame: %d", userFrame));
+					prompt.append(String.format("  User: x=%.4f, y=%.4f, z=%.4f\n", userFrameData[0], userFrameData[1],
+							userFrameData[2]));
+
+					prompt.append(String.format("Pro Frame: %d\n", proFrame));
+					prompt.append(String.format("  Pro:  x=%.4f, y=%.4f, z=%.4f\n\n", proFrameData[0], proFrameData[1],
+							proFrameData[2]));
+				}
 			}
 		}
 		return prompt.toString();

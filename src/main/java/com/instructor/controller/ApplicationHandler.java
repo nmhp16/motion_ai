@@ -93,7 +93,11 @@ public class ApplicationHandler {
          */
         public String generateFeedbackAPI(String prompt) {
                 // The prompt to send to the python script
-                String base = "Compare the these 3D motion frame sets and provide feedback for the user: " + prompt
+                String base = "Provide feedback based on the comparison for the user to improve their 3D motion alignment. Focus on the following: "
+                                + "Analyze the differences between the user and pro keypoints (x, y, z coordinates)."
+                                + "Offer specific guidance on how to adjust the user's motion in terms of body part positions, alignment, and timing."
+                                + "Suggest improvements in terms of spatial coordination to match the pro's movement."
+                                + prompt
                                 + ".";
 
                 // The python script path
@@ -108,25 +112,22 @@ public class ApplicationHandler {
 
                         // Read the output of the script
                         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+                        StringBuilder feedback = new StringBuilder();
                         String line;
 
                         while ((line = reader.readLine()) != null) {
-                                return line;
-
+                                feedback.append(line).append("\n");
                         }
+
                         // wait for the process to finish
-                        int exitCode = process.waitFor();
+                        process.waitFor();
 
-                        if (exitCode == 0) {
-                                System.out.println("Python script executed successfully.");
-                        } else {
-                                System.out.println("Python script exited with code: " + exitCode);
-                        }
+                        return feedback.toString(); // Return feedback
+
                 } catch (Exception e) {
                         e.printStackTrace();
                 }
-
                 return null;
         }
-
 }

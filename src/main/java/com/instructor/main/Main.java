@@ -95,7 +95,6 @@ public class Main {
                     break;
 
                 case 3: // Get user history performance
-                    // TODO: Change this with actual score later and show ranking
                     System.out.println("User history: ");
                     // Refresh user history to get the latest data from the file
                     userHistory = fileCleanup.getExistingFilenames();
@@ -144,10 +143,7 @@ public class Main {
                             "shoulder_left");
                     System.out.println(handler.generateFeedbackAPI(prompt1)); // Test API call
 
-                    System.out.println("Shoulder Right: ");
-                    String prompt2 = poseScoring.generateComparisonPrompt(userKeypointsMap, proKeypointsMap,
-                            "shoulder_right");
-                    System.out.println(handler.generateFeedbackAPI(prompt2)); // Test API call
+                    System.out.println();
 
                     break;
 

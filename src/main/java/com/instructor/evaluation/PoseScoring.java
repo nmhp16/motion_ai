@@ -163,4 +163,73 @@ public class PoseScoring {
 				|| bodyPart.equalsIgnoreCase("nose");
 	}
 
+	/**
+	 * Generates a comparison prompt with aligned frame information between user and
+	 * pro keypoints.
+	 *
+	 * This method calculates the alignment path using Dynamic Time Warping (DTW)
+	 * for each required
+	 * body part and constructs a prompt string containing details of aligned
+	 * frames.
+	 *
+	 * @param userKeypoints Map of user keypoints across frames, categorized by body
+	 *                      parts.
+	 * @param proKeypoints  Map of professional keypoints across frames, categorized
+	 *                      by body parts.
+	 * @return A formatted string containing the aligned frames and their respective
+	 *         keypoint coordinates.
+	 */
+	public String generateComparisonPrompt(Map<String, Map<Integer, float[]>> userKeypoints,
+			Map<String, Map<Integer, float[]>> proKeypoints, String partNeeded) {
+
+		// Track alignment frames between user and pro keypoints
+		Map<String, List<int[]>> alignmentFrames = new HashMap<>();
+
+		StringBuilder prompt = new StringBuilder();
+
+		for (String bodyPart : userKeypoints.keySet()) {
+			if (!bodyPart.equalsIgnoreCase(partNeeded)) {
+				continue;
+			}
+
+			Map<Integer, float[]> userPartData = userKeypoints.get(bodyPart);
+			Map<Integer, float[]> proPartData = proKeypoints.get(bodyPart);
+
+			// skip this body part if either user or pro part data is null
+			if (proPartData == null || userPartData == null) {
+				continue;
+			}
+
+			// Calculate alignment path using DTW
+			List<int[]> alignmentPath = DynamicTimeWarping.dtwWithAlignmentPath(userPartData, proPartData);
+			alignmentFrames.put(bodyPart, alignmentPath);
+
+			prompt.append("Body Part: ").append(bodyPart).append("\n");
+
+			// Append aligned frames
+			for (int[] path : alignmentPath) {
+				int userFrame = path[0];
+				int proFrame = path[1];
+
+				float[] userFrameData = userPartData.get(userFrame);
+				float[] proFrameData = proPartData.get(proFrame);
+
+				if (userFrameData == null || proFrameData == null) {
+					continue;
+				}
+
+				prompt.append(String.format("User Frame: %d", userFrame));
+				prompt.append(
+						String.format("  User: x=%.4f, y=%.4f, z=%.4f\n", userFrameData[0], userFrameData[1],
+								userFrameData[2]));
+
+				prompt.append(String.format("Pro Frame: %d\n", proFrame));
+				prompt.append(
+						String.format("  Pro:  x=%.4f, y=%.4f, z=%.4f\n\n", proFrameData[0], proFrameData[1],
+								proFrameData[2]));
+			}
+		}
+		return prompt.toString();
+	}
+
 }

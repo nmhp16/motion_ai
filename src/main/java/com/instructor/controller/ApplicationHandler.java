@@ -83,4 +83,50 @@ public class ApplicationHandler {
                 }
         }
 
+        /**
+         * Generates feedback by invoking a Python script that compares dance frame
+         * sets.
+         *
+         * @param prompt The input prompt containing details for the comparison.
+         * @return A string containing the feedback result from the Python script.
+         *         Returns null if an error occurs during script execution.
+         */
+        public String generateFeedbackAPI(String prompt) {
+                // The prompt to send to the python script
+                String base = "Compare the these 3D motion frame sets and provide feedback for the user: " + prompt
+                                + ".";
+
+                // The python script path
+                String pythonScriptPath = "./web_call/AI_Call.py";
+
+                try {
+                        // Build command to execute Python script
+                        ProcessBuilder processBuilder = new ProcessBuilder("python", pythonScriptPath, base);
+
+                        // Start the process
+                        Process process = processBuilder.start();
+
+                        // Read the output of the script
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                        String line;
+
+                        while ((line = reader.readLine()) != null) {
+                                return line;
+
+                        }
+                        // wait for the process to finish
+                        int exitCode = process.waitFor();
+
+                        if (exitCode == 0) {
+                                System.out.println("Python script executed successfully.");
+                        } else {
+                                System.out.println("Python script exited with code: " + exitCode);
+                        }
+                } catch (Exception e) {
+                        e.printStackTrace();
+                }
+
+                return null;
+        }
+
 }

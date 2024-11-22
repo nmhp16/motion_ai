@@ -11,7 +11,6 @@ import com.instructor.controller.ApplicationHandler;
 import com.instructor.controller.FileCleanup;
 import com.instructor.data.PoseDataProcessing;
 import com.instructor.data.PoseDataReader;
-import com.instructor.evaluation.JointScoring;
 import com.instructor.evaluation.PoseFeedback;
 import com.instructor.evaluation.PoseScoring;
 
@@ -130,15 +129,6 @@ public class Main {
                     // DTW Score
                     int finalScore = poseScoring.calculateScore(similarityScore, maxSimilarity);
 
-                    // Calculate body parts score and get feedback
-                    poseScoring.calculatePoseScore(userKeypointsMap, proKeypointsMap);
-
-
-
-                    //TODO: add the new fuction call to run joint movement analysis check
-                    //This will be for the joints
-                    JointScoring.generateFeedbackForAllJoints(userKeypointsMap, proKeypointsMap);
-
                     // Output similarity score and final score overall
                     System.out.println();
 
@@ -147,6 +137,18 @@ public class Main {
 
                     System.out.println(poseFeedback.provideFeedback(finalScore)); // Display feedback based on score
                     System.out.println();
+
+                    // TODO: Complete API call
+                    System.out.println("Shoulder Left: ");
+                    String prompt1 = poseScoring.generateComparisonPrompt(userKeypointsMap, proKeypointsMap,
+                            "shoulder_left");
+                    System.out.println(handler.generateFeedbackAPI(prompt1)); // Test API call
+
+                    System.out.println("Shoulder Right: ");
+                    String prompt2 = poseScoring.generateComparisonPrompt(userKeypointsMap, proKeypointsMap,
+                            "shoulder_right");
+                    System.out.println(handler.generateFeedbackAPI(prompt2)); // Test API call
+
                     break;
 
                 case 4: // Exit

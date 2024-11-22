@@ -1,7 +1,10 @@
 package com.instructor.main;
 
+import java.io.File;
+
+import com.instructor.controller.ApplicationHandler;
+
 import javafx.application.Application;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,9 +14,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 public class DanceInstructorUI extends Application {
 
@@ -60,9 +64,7 @@ public class DanceInstructorUI extends Application {
             }
         });
         inputFileButton.setOnAction(e -> {
-            if (!"Inputting file...".equals((recordingLabel.getText()))) {
-                recordingLabel.setText("Inputting file...");
-            }
+            openFileChooser(primaryStage);
         });
 
         // Action for the Done button
@@ -108,6 +110,31 @@ public class DanceInstructorUI extends Application {
 
         Scene feedbackScene = new Scene(feedbackLayout, 600, 400);
         stage.setScene(feedbackScene);
+    }
+
+    // Method to open the FileChooser
+    private void openFileChooser(Stage primaryStage) {
+        // Create a FileChooser
+        FileChooser fileChooser = new FileChooser();
+
+        // Allow all file types
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All Files", "*.*"));
+
+        // Open the file chooser and get the selected file
+        File selectedFile = fileChooser.showOpenDialog(primaryStage);
+
+        // TODO: Figure out how to handle the file after user uploads
+        ApplicationHandler handler = new ApplicationHandler();
+        if (selectedFile != null) {
+            String fileName = selectedFile.getName();
+            if (fileName.endsWith(".mp4")) {
+                handler.runUploadPoseEstimation(selectedFile.getPath(), "Test");
+            } else {
+                System.out.println("The selected file is invalid. Please upload a .mp4 file.");
+            }
+        } else {
+            System.out.println("The selected file is invalid. Please upload a .mp4 file.");
+        }
     }
 
     public static void main(String[] args) {

@@ -128,27 +128,30 @@ public class DanceInstructorUIController {
 	 * @param stage The stage to open the FileChooser on
 	 */
 	private void openFileChooser(Stage stage, String videoType) {
-		// Create a FileChooser
-		FileChooser fileChooser = new FileChooser();
+		new Thread(() -> {
+			// Create a FileChooser
+			FileChooser fileChooser = new FileChooser();
 
-		// Allow all file types
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All Files", "*.*"));
+			// Allow all file types
+			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All Files", "*.*"));
 
-		// Open the file chooser and get the selected file
-		File selectedFile = fileChooser.showOpenDialog(primaryStage);
+			// Open the file chooser and get the selected file
+			File selectedFile = fileChooser.showOpenDialog(primaryStage);
 
-		// TODO: Figure out how to handle the file after user uploads
-		ApplicationHandler handler = new ApplicationHandler();
-		if (selectedFile != null) {
-			String fileName = selectedFile.getName();
-			if (fileName.endsWith(".mp4")) {
-				handler.runUploadPoseEstimation(selectedFile.getPath(), videoType);
+			// TODO: Figure out how to handle the file after user uploads
+			ApplicationHandler handler = new ApplicationHandler();
+			if (selectedFile != null) {
+				String fileName = selectedFile.getName();
+				if (fileName.endsWith(".mp4")) {
+					handler.runUploadPoseEstimation(selectedFile.getPath(), videoType);
+				} else {
+					System.out.println("The selected file is invalid. Please upload a .mp4 file.");
+				}
 			} else {
 				System.out.println("The selected file is invalid. Please upload a .mp4 file.");
 			}
-		} else {
-			System.out.println("The selected file is invalid. Please upload a .mp4 file.");
-		}
+		}).start();
+
 	}
 
 	/**

@@ -137,7 +137,6 @@ public class Main {
                     System.out.println(poseFeedback.provideFeedback(finalScore)); // Display feedback based on score
                     System.out.println();
 
-                    // TODO: Complete API call
                     System.out.println("Shoulder Left: ");
                     String prompt1 = poseScoring.generateComparisonPrompt(userKeypointsMap, proKeypointsMap,
                             "shoulder_left");

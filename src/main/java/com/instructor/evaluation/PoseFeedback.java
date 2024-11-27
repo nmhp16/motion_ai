@@ -3,7 +3,6 @@ package com.instructor.evaluation;
 import java.util.Map;
 import java.util.HashMap;
 
-// TODO: COMPLETE FEEDBACK 
 public class PoseFeedback {
     private Map<String, String> feedbackMap;
 

@@ -5,7 +5,13 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.instructor.data.PoseDataProcessing;
+import com.instructor.data.PoseDataReader;
+import com.instructor.main.DanceInstructorUIController;
+
 public class ApplicationHandler {
+        private PoseDataReader poseDataReader = new PoseDataReader();
+        private PoseDataProcessing poseDataProcessing = new PoseDataProcessing();
 
         /**
          * Method to capture user video for pose estimation
@@ -25,9 +31,14 @@ public class ApplicationHandler {
                         // Read the output of the script
                         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
                         String line;
+                        String fileName = null;
 
                         while ((line = reader.readLine()) != null) {
                                 System.out.println(line);
+
+                                if (line.endsWith(".txt")) {
+                                        fileName = line;
+                                }
                         }
 
                         // Wait for the process to finish
@@ -35,7 +46,19 @@ public class ApplicationHandler {
                         System.out.println("Python script exited with code: " + exitCode);
 
                         // Return true if exit code is 0, otherwise false
-                        return exitCode == 0;
+                        if (exitCode == 0) {
+                                DanceInstructorUIController.isUserInput = true;
+
+                                DanceInstructorUIController.userKeypointsMap = poseDataReader
+                                                .readKeypointsFromFile(fileName);
+
+                                DanceInstructorUIController.userKeypointsMap = poseDataProcessing
+                                                .processPoseData(DanceInstructorUIController.userKeypointsMap);
+
+                                return true;
+                        } else {
+                                return false;
+                        }
 
                 } catch (Exception e) {
                         e.printStackTrace();
@@ -66,8 +89,14 @@ public class ApplicationHandler {
                         // Read the output of the Python script
                         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
                         String line;
+                        String fileName = null;
+
                         while ((line = reader.readLine()) != null) {
                                 System.out.println(line); // Print the Python output to Java console
+
+                                if (line.endsWith(".txt")) {
+                                        fileName = line;
+                                }
                         }
 
                         // Wait for the process to complete
@@ -75,6 +104,25 @@ public class ApplicationHandler {
 
                         if (exitCode == 0) {
                                 System.out.println("Pose estimation completed successfully.");
+
+                                if (videoType.equals("beginner")) {
+                                        DanceInstructorUIController.isUserInput = true;
+
+                                        DanceInstructorUIController.userKeypointsMap = poseDataReader
+                                                        .readKeypointsFromFile(fileName);
+
+                                        DanceInstructorUIController.userKeypointsMap = poseDataProcessing
+                                                        .processPoseData(DanceInstructorUIController.userKeypointsMap);
+
+                                } else if (videoType.equals("pro")) {
+                                        DanceInstructorUIController.isProInput = true;
+
+                                        DanceInstructorUIController.proKeypointsMap = poseDataReader
+                                                        .readKeypointsFromFile(fileName);
+
+                                        DanceInstructorUIController.proKeypointsMap = poseDataProcessing
+                                                        .processPoseData(DanceInstructorUIController.proKeypointsMap);
+                                }
                         } else {
                                 System.out.println("Pose estimation encountered an error. Exit code: " + exitCode);
                         }

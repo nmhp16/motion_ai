@@ -76,6 +76,8 @@ public class DanceInstructorUI extends Application {
 
         mainScene = new Scene(mainLayout, 600, 400);
 
+        controller.setMainScene(mainScene);
+
         // Set up the stage
         primaryStage.setTitle("Camera Input App");
         primaryStage.setScene(mainScene);

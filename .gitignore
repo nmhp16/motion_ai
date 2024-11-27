@@ -34,3 +34,10 @@ Thumbs.db          # Windows
 *~                   # Backup files created by some editors
 *.bak                # Backup files
 
+# Ignore video files
+*.mp4
+*.mkv
+*.avi
+
+# Ignore text files
+*.txt

@@ -187,7 +187,7 @@ class PoseEstimationService:
                     for pos in positions:
                         f.write(f"  Frame {pos[0]}: x={pos[1]:.4f}, y={pos[2]:.4f}, z={pos[3]:.4f}\n")
                     f.write("\n")
-        print(f"Saved keypoints data to {self.keypoints_file}")
+        print(self.keypoints_file)
         
         # Append to the shared file if it exists, otherwise create and write
         mode = 'a' if os.path.exists("last_saved_filename.txt") else 'w'

@@ -6,8 +6,6 @@ import java.util.Map;
 
 import com.instructor.algorithms.DynamicTimeWarping;
 import com.instructor.controller.ApplicationHandler;
-import com.instructor.data.PoseDataProcessing;
-import com.instructor.data.PoseDataReader;
 import com.instructor.evaluation.PoseFeedback;
 import com.instructor.evaluation.PoseScoring;
 
@@ -15,12 +13,14 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -32,14 +32,14 @@ public class DanceInstructorUIController {
 	private Button userButton;
 	private Button profButton;
 	private Button backButton;
+	private Scene mainScene;
+
 	public static Map<String, Map<Integer, float[]>> userKeypointsMap = new HashMap<>();
 	public static Map<String, Map<Integer, float[]>> proKeypointsMap = new HashMap<>();
-	private PoseDataReader poseDataReader = new PoseDataReader();
-	private PoseDataProcessing poseDataProcessing = new PoseDataProcessing();
 	private PoseFeedback poseFeedback = new PoseFeedback();
 	private PoseScoring poseScoring = new PoseScoring();
-	public static boolean isUserInput = true;
-	public static boolean isProInput = true;
+	public static boolean isUserInput = false;
+	public static boolean isProInput = false;
 
 	public DanceInstructorUIController(Stage primaryStage, Button startButton, Button inputButton, Button doneButton,
 			Button userButton, Button profButton, Button backButton) {
@@ -56,7 +56,7 @@ public class DanceInstructorUIController {
 
 	// Set up button event handlers
 	private void setupEventHandlers() {
-		startButton.setOnAction(event -> startVideoCapture());
+		startButton.setOnAction(event -> startVideoCapture(primaryStage));
 		doneButton.setOnAction(event -> showFeedbackScreen(primaryStage));
 
 		// Set up button event handlers for user
@@ -65,8 +65,7 @@ public class DanceInstructorUIController {
 		profButton.setOnAction(event -> handleProfButton());
 
 		backButton.setOnAction(event -> {
-			DanceInstructorUI danceInstructorUI = new DanceInstructorUI();
-			danceInstructorUI.start(primaryStage);
+			showMainScreen();
 		});
 	}
 
@@ -84,7 +83,6 @@ public class DanceInstructorUIController {
 
 		inputButton.setOnAction(e -> openFileChooser(primaryStage, "beginner"));
 
-		isUserInput = true;
 		primaryStage.setScene(new Scene(buttonBox, 600, 400));
 	}
 
@@ -102,8 +100,6 @@ public class DanceInstructorUIController {
 		buttonBox.setPadding(new Insets(10));
 
 		inputButton.setOnAction(e -> openFileChooser(primaryStage, "pro"));
-
-		isProInput = true;
 		primaryStage.setScene(new Scene(buttonBox, 600, 400));
 	}
 
@@ -114,7 +110,7 @@ public class DanceInstructorUIController {
 	 * 
 	 * @see #stopVideoCapture()
 	 */
-	private void startVideoCapture() {
+	private void startVideoCapture(Stage stage) {
 		new Thread(() -> {
 			ApplicationHandler handler = new ApplicationHandler();
 			handler.runCapturePoseEstimation();
@@ -128,29 +124,29 @@ public class DanceInstructorUIController {
 	 * @param stage The stage to open the FileChooser on
 	 */
 	private void openFileChooser(Stage stage, String videoType) {
-		new Thread(() -> {
-			// Create a FileChooser
-			FileChooser fileChooser = new FileChooser();
 
-			// Allow all file types
-			fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All Files", "*.*"));
+		// Create a FileChooser
+		FileChooser fileChooser = new FileChooser();
 
-			// Open the file chooser and get the selected file
-			File selectedFile = fileChooser.showOpenDialog(primaryStage);
+		// Allow all file types
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All Files", "*.*"));
 
-			// TODO: Figure out how to handle the file after user uploads
-			ApplicationHandler handler = new ApplicationHandler();
-			if (selectedFile != null) {
-				String fileName = selectedFile.getName();
-				if (fileName.endsWith(".mp4")) {
+		// Open the file chooser and get the selected file
+		File selectedFile = fileChooser.showOpenDialog(primaryStage);
+
+		ApplicationHandler handler = new ApplicationHandler();
+		if (selectedFile != null) {
+			String fileName = selectedFile.getName();
+			if (fileName.endsWith(".mp4")) {
+				new Thread(() -> {
 					handler.runUploadPoseEstimation(selectedFile.getPath(), videoType);
-				} else {
-					System.out.println("The selected file is invalid. Please upload a .mp4 file.");
-				}
+				}).start();
 			} else {
 				System.out.println("The selected file is invalid. Please upload a .mp4 file.");
 			}
-		}).start();
+		} else {
+			System.out.println("The selected file is invalid. Please upload a .mp4 file.");
+		}
 
 	}
 
@@ -167,46 +163,11 @@ public class DanceInstructorUIController {
 
 		// Display loading screen while thread is running
 		if (isUserInput && isProInput) {
-			// Show loading screen with progress bar
-			ProgressBar progressBar = new ProgressBar();
-			progressBar.setPrefWidth(300);
-			VBox loadingLayout = new VBox(20, new Label("Loading, please wait..."), progressBar);
-			loadingLayout.setAlignment(Pos.CENTER);
-			Scene loadingScene = new Scene(loadingLayout, 800, 700);
-			stage.setScene(loadingScene);
-
-			// TODO: FIX PROGRESS BAR LATER
-			// Match loading of progress bar when how the thread running
-			new Thread(() -> {
-				// Run 35 times
-				for (int i = 0; i < 35; i++) {
-					int j = i;
-					// Update progress bar
-					Platform.runLater(() -> progressBar.setProgress(j / 35.0));
-					// Wait 100 milliseconds
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-				// Update progress bar to 100%
-				Platform.runLater(() -> progressBar.setProgress(1));
-			}).start();
+			// Show ProgressBar
+			showProgressBar(stage);
 
 			// Run processing in a separate thread
 			new Thread(() -> {
-				userKeypointsMap = poseDataReader
-						.readKeypointsFromFile("beginner.txt");
-
-				userKeypointsMap = poseDataProcessing
-						.processPoseData(userKeypointsMap);
-
-				proKeypointsMap = poseDataReader
-						.readKeypointsFromFile("pro.txt");
-
-				proKeypointsMap = poseDataProcessing
-						.processPoseData(proKeypointsMap);
 
 				// Calculate similarity score between user and pro based on total distance
 				// difference
@@ -249,8 +210,10 @@ public class DanceInstructorUIController {
 
 				// Displays main scene
 				backButton.setOnAction(e -> {
-					DanceInstructorUI danceInstructorUI = new DanceInstructorUI();
-					danceInstructorUI.start(stage);
+					isUserInput = false;
+					isProInput = false;
+
+					showMainScreen();
 				});
 
 				feedbackLayout.getChildren().addAll(backButton, feedbackLabel, feedbackTextArea);
@@ -258,6 +221,60 @@ public class DanceInstructorUIController {
 				Scene feedbackScene = new Scene(feedbackLayout, 800, 700);
 				Platform.runLater(() -> stage.setScene(feedbackScene));
 			}).start();
+		} else {
+			if (!isUserInput && !isProInput) {
+				// Show alert to input missing file
+				Alert alert = new Alert(Alert.AlertType.ERROR);
+				alert.setTitle("Input Missing");
+				alert.setHeaderText("Please input a user video and a professional video.");
+				alert.showAndWait();
+			} else if (!isUserInput) {
+				// Show alert to input missing file
+				Alert alert = new Alert(Alert.AlertType.ERROR);
+				alert.setTitle("Input Missing");
+				alert.setHeaderText("Please input a user video.");
+				alert.showAndWait();
+			} else if (!isProInput) {
+				// Show alert to input missing file
+				Alert alert = new Alert(Alert.AlertType.ERROR);
+				alert.setTitle("Input Missing");
+				alert.setHeaderText("Please input a professional video.");
+				alert.showAndWait();
+			}
 		}
+
+	}
+
+	/**
+	 * Displays a loading screen with a progress bar on the given stage.
+	 * 
+	 * @param stage The stage on which to set the loading scene.
+	 */
+	private void showProgressBar(Stage stage) {
+		// Show loading screen with progress bar
+		ProgressBar progressBar = new ProgressBar();
+		progressBar.setPrefWidth(300);
+		Label loadingLabel = new Label("Loading, please wait...");
+		loadingLabel.setFont(new Font("Georgia", 20));
+		VBox loadingLayout = new VBox(20, loadingLabel, progressBar);
+		loadingLayout.setAlignment(Pos.CENTER);
+		Scene loadingScene = new Scene(loadingLayout, 800, 700);
+		stage.setScene(loadingScene);
+	}
+
+	/**
+	 * Displays the main scene on the primary stage.
+	 */
+	private void showMainScreen() {
+		primaryStage.setScene(mainScene);
+	}
+
+	/**
+	 * Sets the main scene for the application to the given scene.
+	 * 
+	 * @param scene The main scene for the application.
+	 */
+	public void setMainScene(Scene scene) {
+		this.mainScene = scene;
 	}
 }

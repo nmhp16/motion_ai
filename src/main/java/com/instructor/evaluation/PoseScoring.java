@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.instructor.algorithms.DynamicTimeWarping;
 
-// TODO: COMPLETE TEST CODE
 public class PoseScoring {
 	private PoseFeedback feedback = new PoseFeedback();
 	private int score = 0;

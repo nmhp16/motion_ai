@@ -2,6 +2,7 @@ package com.instructor.main;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.instructor.algorithms.DynamicTimeWarping;
@@ -16,8 +17,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -40,6 +43,7 @@ public class DanceInstructorUIController {
 	private PoseScoring poseScoring = new PoseScoring();
 	public static boolean isUserInput = false;
 	public static boolean isProInput = false;
+	private boolean isPartChosen = false;
 
 	public DanceInstructorUIController(Stage primaryStage, Button startButton, Button inputButton, Button doneButton,
 			Button userButton, Button profButton, Button backButton) {
@@ -57,7 +61,22 @@ public class DanceInstructorUIController {
 	// Set up button event handlers
 	private void setupEventHandlers() {
 		startButton.setOnAction(event -> startVideoCapture(primaryStage));
-		doneButton.setOnAction(event -> showFeedbackScreen(primaryStage));
+		doneButton.setOnAction(event -> {
+			if (isUserInput && isProInput) {
+				showOption();
+			} else {
+				if (!isUserInput && !isProInput) {
+					// Show alert to input missing file
+					showError("Input Missing", "Please input a user video and a professional video.");
+				} else if (!isUserInput) {
+					// Show alert to input missing file
+					showError("Input Missing", "Please input a user video.");
+				} else if (!isProInput) {
+					// Show alert to input missing file
+					showError("Input Missing", "Please input a professional video.");
+				}
+			}
+		});
 
 		// Set up button event handlers for user
 		userButton.setOnAction(event -> handleUserButton());
@@ -159,89 +178,64 @@ public class DanceInstructorUIController {
 	 * 
 	 * @param stage The stage to set the new scene on
 	 */
-	private void showFeedbackScreen(Stage stage) {
+	private void showFeedbackScreen(Stage stage, String userInput) {
 
-		// Display loading screen while thread is running
-		if (isUserInput && isProInput) {
-			// Show ProgressBar
-			showProgressBar(stage);
+		// Show ProgressBar
+		showProgressBar(stage);
 
-			// Run processing in a separate thread
-			new Thread(() -> {
+		// Run processing in a separate thread
+		new Thread(() -> {
 
-				// Calculate similarity score between user and pro based on total distance
-				// difference
-				float similarityScore = DynamicTimeWarping.totalDtw(userKeypointsMap, proKeypointsMap);
+			// Calculate similarity score between user and pro based on total distance
+			// difference
+			float similarityScore = DynamicTimeWarping.totalDtw(userKeypointsMap, proKeypointsMap);
 
-				// Assume max similarity and calculate total score
-				float maxSimilarity = 4.0f; // Replace with actual value
+			// Assume max similarity and calculate total score
+			float maxSimilarity = 4.0f; // Replace with actual value
 
-				// DTW Score
-				int finalScore = poseScoring.calculateScore(similarityScore, maxSimilarity);
+			// DTW Score
+			int finalScore = poseScoring.calculateScore(similarityScore, maxSimilarity);
 
-				ApplicationHandler handler = new ApplicationHandler();
+			ApplicationHandler handler = new ApplicationHandler();
 
-				// Feedback screen layout
-				VBox feedbackLayout = new VBox(20);
-				feedbackLayout.setAlignment(Pos.TOP_LEFT);
-				feedbackLayout.setPadding(new Insets(20));
+			// Feedback screen layout
+			VBox feedbackLayout = new VBox(20);
+			feedbackLayout.setAlignment(Pos.TOP_LEFT);
+			feedbackLayout.setPadding(new Insets(20));
 
-				// Label for feedback
-				Label feedbackLabel = new Label("Feedback:");
-				TextArea feedbackTextArea = new TextArea();
-				feedbackTextArea.setEditable(false);
-				feedbackTextArea.setPrefSize(700, 600);
+			// Label for feedback
+			Label feedbackLabel = new Label("Feedback:");
+			TextArea feedbackTextArea = new TextArea();
+			feedbackTextArea.setEditable(false);
+			feedbackTextArea.setPrefSize(700, 600);
 
-				feedbackTextArea.appendText("Final Score (out of 100): " + finalScore);
+			feedbackTextArea.appendText("Final Score (out of 100): " + finalScore);
 
-				feedbackTextArea.appendText("\n\n");
+			feedbackTextArea.appendText("\n\n");
 
-				feedbackTextArea.appendText(poseFeedback.provideFeedback(finalScore));
+			feedbackTextArea.appendText(poseFeedback.provideFeedback(finalScore));
 
-				feedbackTextArea.appendText("\n\n");
+			feedbackTextArea.appendText("\n\n");
 
-				String prompt = poseScoring.generateComparisonPrompt(userKeypointsMap, proKeypointsMap,
-						"shoulder_left");
+			String prompt = poseScoring.generateComparisonPrompt(userKeypointsMap, proKeypointsMap,
+					userInput);
 
-				feedbackTextArea.appendText(handler.generateFeedbackAPI(prompt)); // Generate feedback
+			feedbackTextArea.appendText(handler.generateFeedbackAPI(prompt)); // Generate feedback
 
-				// Back button
-				Button backButton = new Button("Back");
+			// Back button
+			Button backButton = new Button("Back");
 
-				// Displays main scene
-				backButton.setOnAction(e -> {
-					isUserInput = false;
-					isProInput = false;
+			// Displays main scene
+			backButton.setOnAction(e -> {
+				isPartChosen = false;
+				showMainScreen();
+			});
 
-					showMainScreen();
-				});
+			feedbackLayout.getChildren().addAll(backButton, feedbackLabel, feedbackTextArea);
 
-				feedbackLayout.getChildren().addAll(backButton, feedbackLabel, feedbackTextArea);
-
-				Scene feedbackScene = new Scene(feedbackLayout, 800, 700);
-				Platform.runLater(() -> stage.setScene(feedbackScene));
-			}).start();
-		} else {
-			if (!isUserInput && !isProInput) {
-				// Show alert to input missing file
-				Alert alert = new Alert(Alert.AlertType.ERROR);
-				alert.setTitle("Input Missing");
-				alert.setHeaderText("Please input a user video and a professional video.");
-				alert.showAndWait();
-			} else if (!isUserInput) {
-				// Show alert to input missing file
-				Alert alert = new Alert(Alert.AlertType.ERROR);
-				alert.setTitle("Input Missing");
-				alert.setHeaderText("Please input a user video.");
-				alert.showAndWait();
-			} else if (!isProInput) {
-				// Show alert to input missing file
-				Alert alert = new Alert(Alert.AlertType.ERROR);
-				alert.setTitle("Input Missing");
-				alert.setHeaderText("Please input a professional video.");
-				alert.showAndWait();
-			}
-		}
+			Scene feedbackScene = new Scene(feedbackLayout, 800, 700);
+			Platform.runLater(() -> stage.setScene(feedbackScene));
+		}).start();
 
 	}
 
@@ -277,4 +271,91 @@ public class DanceInstructorUIController {
 	public void setMainScene(Scene scene) {
 		this.mainScene = scene;
 	}
+
+	/**
+	 * Shows an option screen with a list of valid body parts and a text input
+	 * field.
+	 * The user can input a body part, and the application will show a feedback
+	 * screen
+	 * with the corresponding feedback for the input body part.
+	 */
+	private void showOption() {
+		// Define valid body parts
+		List<String> validBodyParts = List.of(
+				"shoulder_left", "shoulder_right",
+				"elbow_left", "elbow_right",
+				"wrist_left", "wrist_right",
+				"hip_left", "hip_right",
+				"knee_left", "knee_right",
+				"ankle_left", "ankle_right",
+				"heel_left", "heel_right",
+				"foot_index_left", "foot_index_right",
+				"nose");
+
+		// Create layout with padding and alignment
+		VBox optionLayout = new VBox(15);
+		optionLayout.setAlignment(Pos.CENTER);
+		optionLayout.setPadding(new Insets(20)); // Add padding for cleaner spacing
+
+		// Style the available options label to improve readability
+		Label availableOptionsLabel = new Label("Available body parts:");
+		availableOptionsLabel.setFont(new Font("Georgia", 20));
+
+		// List body parts in a scrollable area for better user experience
+		ListView<String> bodyPartsListView = new ListView<>();
+		bodyPartsListView.getItems().addAll(validBodyParts);
+		bodyPartsListView.setPrefHeight(150); // Set height to make it scrollable if necessary
+
+		// Label for the text input prompt
+		Label label = new Label("Enter body part:");
+		label.setFont(new Font("Georgia", 20));
+
+		// TextField for user input with styling
+		TextField textField = new TextField();
+		textField.setPromptText("e.g. shoulder_left");
+		textField.setPrefHeight(30);
+
+		// Submit button with styling
+		Button button = new Button("Submit");
+		button.setFont(new Font("Georgia", 16));
+
+		// Add elements to the layout
+		optionLayout.getChildren().addAll(availableOptionsLabel, bodyPartsListView, label, textField, button);
+
+		// Create a new stage
+		Stage stage = new Stage();
+
+		// Set button action to submit the input
+		button.setOnAction(event -> {
+			String userInput = textField.getText().trim(); // Get trimmed input
+			isPartChosen = true;
+
+			if (poseScoring.isPartNeeded(userInput) && isPartChosen) {
+				stage.close();
+				showFeedbackScreen(primaryStage, userInput); // Show feedback with the user input if valid
+			} else {
+				// Show error if the input is invalid
+				showError("Invalid input!", "Please select a valid body part.");
+			}
+		});
+
+		// Set up and show the scene
+		Scene scene = new Scene(optionLayout, 400, 500);
+		stage.setScene(scene);
+		stage.show();
+	}
+
+	/**
+	 * Shows an error dialog with the given title and message.
+	 * 
+	 * @param title   The title of the error dialog.
+	 * @param message The message of the error dialog.
+	 */
+	private void showError(String title, String message) {
+		Alert alert = new Alert(Alert.AlertType.ERROR);
+		alert.setTitle(title);
+		alert.setHeaderText(message);
+		alert.showAndWait();
+	}
+
 }

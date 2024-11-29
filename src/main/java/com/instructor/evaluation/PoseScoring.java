@@ -138,12 +138,12 @@ public class PoseScoring {
 	}
 
 	/**
-	 * Helper method to check for only body parts needed
+	 * Method to check for only body parts needed
 	 * 
 	 * @param bodyPart Current body part
 	 * @return True if it is needed, False otherwise
 	 */
-	private boolean isPartNeeded(String bodyPart) {
+	public boolean isPartNeeded(String bodyPart) {
 		return bodyPart.equalsIgnoreCase("shoulder_left") || bodyPart.equalsIgnoreCase("shoulder_right")
 				|| bodyPart.equalsIgnoreCase("elbow_left") || bodyPart.equalsIgnoreCase("elbow_right")
 				|| bodyPart.equalsIgnoreCase("wrist_left") || bodyPart.equalsIgnoreCase("wrist_right")
@@ -176,6 +176,7 @@ public class PoseScoring {
 
 		// Track alignment frames between user and pro keypoints
 		Map<String, List<int[]>> alignmentFrames = new HashMap<>();
+
 		StringBuilder prompt = new StringBuilder();
 
 		for (String bodyPart : userKeypoints.keySet()) {
@@ -231,5 +232,4 @@ public class PoseScoring {
 		}
 		return prompt.toString();
 	}
-
 }

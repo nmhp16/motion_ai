@@ -22,17 +22,25 @@ public class DynamicTimeWarping {
         int partCount = 0;
 
         for (String keypoint : userKeypoints.keySet()) {
-            Map<Integer, float[]> userPartData = userKeypoints.getOrDefault(keypoint, new HashMap<>());
-            Map<Integer, float[]> proPartData = proKeypoints.getOrDefault(keypoint, new HashMap<>());
 
-            if (!userPartData.isEmpty() && !proPartData.isEmpty()) {
-                float dtwDistance = dtw(userPartData, proPartData);
-                totalDtwDistance += dtwDistance;
-                partCount++;
+            // Check if the keypoint is needed
+            if (isPartNeeded(keypoint)) {
+                Map<Integer, float[]> userPartData = userKeypoints.getOrDefault(keypoint, new HashMap<>());
+                Map<Integer, float[]> proPartData = proKeypoints.getOrDefault(keypoint, new HashMap<>());
+
+                if (!userPartData.isEmpty() && !proPartData.isEmpty()) {
+                    float dtwDistance = dtw(userPartData, proPartData);
+                    totalDtwDistance += dtwDistance;
+                    partCount++;
+                }
             }
         }
 
-        return partCount > 0 ? totalDtwDistance / partCount : Float.MAX_VALUE;
+        if (partCount > 0) {
+            return totalDtwDistance / partCount;
+        } else {
+            return Float.MAX_VALUE;
+        }
     }
 
     /**
@@ -55,8 +63,8 @@ public class DynamicTimeWarping {
         // Use sorted keys to access data consistently
         List<Integer> userKeys = new ArrayList<>(userPartData.keySet());
         List<Integer> proKeys = new ArrayList<>(proPartData.keySet());
-        Collections.sort(userKeys); // TODO: Can change with merge sort later
-        Collections.sort(proKeys); // TODO: Can change with merge sort later
+        MergeSort.mergeSort(userKeys, true); // Sort in ascending order
+        MergeSort.mergeSort(proKeys, true); // Sort in ascending order
 
         int n = userKeys.size();
         int m = proKeys.size();
@@ -160,7 +168,26 @@ public class DynamicTimeWarping {
             }
         }
 
-        Collections.reverse(alignmentPath); // TODO: Replace with merge sort
+        Collections.reverse(alignmentPath);
         return alignmentPath;
     }
+
+    /**
+     * Helper method to check for only body parts needed
+     * 
+     * @param bodyPart Current body part
+     * @return True if it is needed, False otherwise
+     */
+    private static boolean isPartNeeded(String bodyPart) {
+        return bodyPart.equalsIgnoreCase("shoulder_left") || bodyPart.equalsIgnoreCase("shoulder_right")
+                || bodyPart.equalsIgnoreCase("elbow_left") || bodyPart.equalsIgnoreCase("elbow_right")
+                || bodyPart.equalsIgnoreCase("wrist_left") || bodyPart.equalsIgnoreCase("wrist_right")
+                || bodyPart.equalsIgnoreCase("hip_left") || bodyPart.equalsIgnoreCase("hip_right")
+                || bodyPart.equalsIgnoreCase("knee_left") || bodyPart.equalsIgnoreCase("knee_right")
+                || bodyPart.equalsIgnoreCase("ankle_left") || bodyPart.equalsIgnoreCase("ankle_right")
+                || bodyPart.equalsIgnoreCase("heel_left") || bodyPart.equalsIgnoreCase("heel_right")
+                || bodyPart.equalsIgnoreCase("foot_index_left") || bodyPart.equalsIgnoreCase("foot_index_right")
+                || bodyPart.equalsIgnoreCase("nose");
+    }
+
 }

@@ -5,4 +5,5 @@ module DanceInstructor {
     requires javafx.swing;
 
     exports com.instructor.main;
+
 }

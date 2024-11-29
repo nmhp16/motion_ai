@@ -5,7 +5,6 @@ import java.util.Map;
 import com.instructor.algorithms.DynamicTimeWarping;
 
 public class JointScoring {
-    	//TODO: these are values that we need to test for so that we can implement it accurately
     private static final float THRESHOLD = 0.2f;
     private static final float DTW_THRESHOLD = 0.05f;
 
@@ -39,7 +38,8 @@ public class JointScoring {
     }
 
     // Function to compare user and pro frames, calculate DTW, and provide feedback
-    public static String compareFramesAndProvideFeedback(String jointName, float[] userFrameData, float[] proFrameData) {
+    public static String compareFramesAndProvideFeedback(String jointName, float[] userFrameData,
+            float[] proFrameData) {
         // Calculate DTW distance (simulated for this example)
         float dtwDistance = DynamicTimeWarping.dtw(Map.of(0, userFrameData), Map.of(0, proFrameData));
 
@@ -51,7 +51,8 @@ public class JointScoring {
         }
     }
 
-    public static void generateFeedbackForAllJoints(Map<String, Map<Integer, float[]>> userDatabase, Map<String, Map<Integer, float[]>> proDatabase) {
+    public static void generateFeedbackForAllJoints(Map<String, Map<Integer, float[]>> userDatabase,
+            Map<String, Map<Integer, float[]>> proDatabase) {
         // Iterate through each joint in the user's database
         for (Map.Entry<String, Map<Integer, float[]>> entry : userDatabase.entrySet()) {
             String jointName = entry.getKey();
@@ -61,7 +62,8 @@ public class JointScoring {
             Map<Integer, float[]> proFrames = proDatabase.get(jointName);
 
             if (proFrames != null) {
-                // For each frame in the user's data, compare it with the corresponding pro frame
+                // For each frame in the user's data, compare it with the corresponding pro
+                // frame
                 for (Map.Entry<Integer, float[]> frameEntry : userFrames.entrySet()) {
                     Integer frameIndex = frameEntry.getKey();
                     float[] userFrameData = frameEntry.getValue();
@@ -84,5 +86,5 @@ public class JointScoring {
             }
         }
     }
-    
+
 }

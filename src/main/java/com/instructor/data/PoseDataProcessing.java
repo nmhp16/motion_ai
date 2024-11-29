@@ -1,10 +1,11 @@
 package com.instructor.data;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.instructor.algorithms.MergeSort;
 
 public class PoseDataProcessing {
 
@@ -163,7 +164,7 @@ public class PoseDataProcessing {
 		for (String keypoint : keypoints.keySet()) {
 			Map<Integer, float[]> keypointFrames = keypoints.getOrDefault(keypoint, new HashMap<>());
 			List<Integer> frames = new ArrayList<>(keypointFrames.keySet());
-			Collections.sort(frames); // TODO: Change with merge sort later
+			MergeSort.mergeSort(frames, true); // Sort in ascending order
 
 			Map<Integer, float[]> interpolatedFrames = new HashMap<>(keypointFrames); // Start with available data
 
@@ -283,7 +284,7 @@ public class PoseDataProcessing {
 
 			// Get sorted frame keys to ensure the window applies across available frame.
 			List<Integer> frames = new ArrayList<>(keypoints.get(keypoint).keySet());
-			Collections.sort(frames); // TODO: Can change with merge sort later
+			MergeSort.mergeSort(frames, true); // Sort in ascending order
 
 			// Apply smoothing for each frame
 			for (int i = 0; i < frames.size(); i++) {

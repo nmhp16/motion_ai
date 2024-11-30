@@ -1,10 +1,12 @@
 package com.instructor.algorithms;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveAction;
 
 public class MergeSort {
+    private static final ForkJoinPool pool = ForkJoinPool.commonPool(); // Global thread pool
+    private static final int THRESHOLD = 20; // Threshold for insertion sort
 
     /**
      * Sorts a list of integers in ascending order using the merge sort algorithm.
@@ -18,39 +20,41 @@ public class MergeSort {
             return; // Base case: a list of size 0 or 1 is already sorted
         }
 
-        // Start the mergeSort helper function with additional parameters for indexing
-        mergeSort(list, 0, list.size() - 1, ascending);
+        pool.invoke(new MergeSortTask<>(list, 0, list.size() - 1, ascending));
     }
 
-    /**
-     * Recursively divides the list into two halves until the base case of a
-     * list of size 0 or 1 is reached. Then, the sorted halves are merged back
-     * together in place.
-     *
-     * @param list  The list to be sorted
-     * @param left  The starting index of the sub-list to be sorted
-     * @param right The ending index of the sub-list to be sorted
-     */
-    private static <T extends Comparable<T>> void mergeSort(List<T> list, int left, int right, boolean ascending) {
-        if (left < right) {
-            int mid = (left + right) / 2;
+    private static class MergeSortTask<T extends Comparable<T>> extends RecursiveAction {
+        private final List<T> list;
+        private final int left;
+        private final int right;
+        private final boolean ascending;
 
-            // Use CompletableFuture to parallelize sorting of the two halves
-            CompletableFuture<Void> leftSort = CompletableFuture
-                    .runAsync(() -> mergeSort(list, left, mid, ascending));
-            CompletableFuture<Void> rightSort = CompletableFuture
-                    .runAsync(() -> mergeSort(list, mid + 1, right, ascending));
+        public MergeSortTask(List<T> list, int left, int right, boolean ascending) {
+            this.list = list;
+            this.left = left;
+            this.right = right;
+            this.ascending = ascending;
+        }
 
-            // Wait for both sides to be sorted before merging
-            CompletableFuture<Void> allOf = CompletableFuture.allOf(leftSort, rightSort);
-            try {
-                allOf.get(); // Ensure both halves are sorted before proceeding
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
+        @Override
+        protected void compute() {
+            if (right - left + 1 <= THRESHOLD) { // If sublist size <= threshold, use insertion sort
+                InsertionSort.insertionSort(list, left, right, ascending);
+                return;
             }
 
-            // Merge the sorted halves in place
+            int mid = (left + right) / 2;
+
+            // Create subtasks for left and right sublists
+            MergeSortTask<T> leftTask = new MergeSortTask<>(list, left, mid, ascending);
+            MergeSortTask<T> rightTask = new MergeSortTask<>(list, mid + 1, right, ascending);
+
+            // Invoke subtasks in parallel
+            invokeAll(leftTask, rightTask);
+
+            // Merge sorted sublists
             merge(list, left, mid, right, ascending);
+
         }
     }
 
@@ -60,11 +64,13 @@ public class MergeSort {
      * assumes that both sublists are already sorted and merges them into a single
      * sorted sublist.
      *
-     * @param list  The list containing the sublists to be merged.
-     * @param left  The starting index of the first sublist.
-     * @param mid   The ending index of the first sublist, which is also one less
-     *              than the starting index of the second sublist.
-     * @param right The ending index of the second sublist.
+     * @param list      The list containing the sublists to be merged.
+     * @param left      The starting index of the first sublist.
+     * @param mid       The ending index of the first sublist, which is also one
+     *                  less
+     *                  than the starting index of the second sublist.
+     * @param right     The ending index of the second sublist.
+     * @param ascending True if ascending, false if descending
      */
     private static <T extends Comparable<T>> void merge(List<T> list, int left, int mid, int right, boolean ascending) {
         int i = left; // Left sublist pointer
@@ -75,7 +81,7 @@ public class MergeSort {
             // Determine if ascending or descending
             if ((ascending && list.get(i).compareTo(list.get(j)) <= 0)
                     || (!ascending && list.get(i).compareTo(list.get(j)) >= 0)) {
-                i++; // Already sortedS
+                i++; // Already sorted
             } else {
                 // Left > Right Ascending, Right > Left Descending
                 T temp = list.get(j); // Store element

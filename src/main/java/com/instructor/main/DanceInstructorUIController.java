@@ -319,6 +319,14 @@ public class DanceInstructorUIController {
 		Button button = new Button("Submit");
 		button.setFont(new Font("Georgia", 16));
 
+		// Select body part on double click
+		bodyPartsListView.setOnMouseClicked(event -> {
+			if (event.getClickCount() == 2) {
+				String selectedPart = bodyPartsListView.getSelectionModel().getSelectedItem();
+				textField.setText(selectedPart);
+			}
+		});
+
 		// Add elements to the layout
 		optionLayout.getChildren().addAll(availableOptionsLabel, bodyPartsListView, label, textField, button);
 

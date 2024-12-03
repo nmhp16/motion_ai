@@ -62,6 +62,7 @@ public class DanceInstructorUIController {
 	private void setupEventHandlers() {
 
 		doneButton.setOnAction(event -> {
+
 			if (isUserInput && isProInput) {
 				showOption();
 			} else {
@@ -132,8 +133,8 @@ public class DanceInstructorUIController {
 	 * @see #stopVideoCapture()
 	 */
 	private void startVideoCapture(Stage stage, String videoType) {
+		ApplicationHandler handler = new ApplicationHandler();
 		new Thread(() -> {
-			ApplicationHandler handler = new ApplicationHandler();
 			handler.runCapturePoseEstimation(videoType);
 		}).start();
 	}
@@ -230,6 +231,7 @@ public class DanceInstructorUIController {
 			// Displays main scene
 			backButton.setOnAction(e -> {
 				isPartChosen = false;
+
 				showMainScreen();
 			});
 
@@ -262,6 +264,7 @@ public class DanceInstructorUIController {
 	 * Displays the main scene on the primary stage.
 	 */
 	private void showMainScreen() {
+
 		primaryStage.setScene(mainScene);
 	}
 
@@ -282,6 +285,7 @@ public class DanceInstructorUIController {
 	 * with the corresponding feedback for the input body part.
 	 */
 	private void showOption() {
+
 		// Define valid body parts
 		List<String> validBodyParts = List.of(
 				"shoulder_left", "shoulder_right",

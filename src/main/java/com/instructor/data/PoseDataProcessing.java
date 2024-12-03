@@ -34,6 +34,9 @@ public class PoseDataProcessing {
 				float torsoLength = calculateTorsoLength(keypoints, frame);
 				if (torsoLength > 0) {
 					normalizedKeypoints.get(keypoint).put(frame, scaleKeypoint(coords, torsoLength));
+				} else {
+					normalizedKeypoints.get(keypoint).put(frame, coords); // No scaling if no torso length found
+
 				}
 			}
 		}

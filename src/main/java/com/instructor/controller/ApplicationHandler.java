@@ -16,7 +16,7 @@ public class ApplicationHandler {
         /**
          * Method to capture user video for pose estimation
          */
-        public boolean runCapturePoseEstimation() {
+        public boolean runCapturePoseEstimation(String videoType) {
                 try {
                         // Define the command to run the Python script
                         String pythonScriptPath = "./pose_detection/PoseDetection.py"; // Relative path
@@ -47,15 +47,27 @@ public class ApplicationHandler {
 
                         // Return true if exit code is 0, otherwise false
                         if (exitCode == 0) {
-                                DanceInstructorUIController.isUserInput = true;
+                                if (videoType.equals("beginner")) {
+                                        DanceInstructorUIController.isUserInput = true;
 
-                                DanceInstructorUIController.userKeypointsMap = poseDataReader
-                                                .readKeypointsFromFile(fileName);
+                                        DanceInstructorUIController.userKeypointsMap = poseDataReader
+                                                        .readKeypointsFromFile(fileName);
 
-                                DanceInstructorUIController.userKeypointsMap = poseDataProcessing
-                                                .processPoseData(DanceInstructorUIController.userKeypointsMap);
+                                        DanceInstructorUIController.userKeypointsMap = poseDataProcessing
+                                                        .processPoseData(DanceInstructorUIController.userKeypointsMap);
 
-                                return true;
+                                        return true;
+                                } else {
+                                        DanceInstructorUIController.isProInput = true;
+
+                                        DanceInstructorUIController.proKeypointsMap = poseDataReader
+                                                        .readKeypointsFromFile(fileName);
+
+                                        DanceInstructorUIController.proKeypointsMap = poseDataProcessing
+                                                        .processPoseData(DanceInstructorUIController.proKeypointsMap);
+
+                                        return true;
+                                }
                         } else {
                                 return false;
                         }

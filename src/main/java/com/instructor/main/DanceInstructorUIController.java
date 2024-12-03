@@ -60,7 +60,7 @@ public class DanceInstructorUIController {
 
 	// Set up button event handlers
 	private void setupEventHandlers() {
-		startButton.setOnAction(event -> startVideoCapture(primaryStage));
+
 		doneButton.setOnAction(event -> {
 			if (isUserInput && isProInput) {
 				showOption();
@@ -100,6 +100,7 @@ public class DanceInstructorUIController {
 		buttonBox.setAlignment(Pos.CENTER);
 		buttonBox.setPadding(new Insets(10));
 
+		startButton.setOnAction(event -> startVideoCapture(primaryStage, "beginner"));
 		inputButton.setOnAction(e -> openFileChooser(primaryStage, "beginner"));
 
 		primaryStage.setScene(new Scene(buttonBox, 600, 400));
@@ -114,10 +115,11 @@ public class DanceInstructorUIController {
 	 */
 	private void handleProfButton() {
 		// Arrange buttons in HBox
-		HBox buttonBox = new HBox(10, inputButton, backButton);
+		HBox buttonBox = new HBox(10, startButton, inputButton, backButton);
 		buttonBox.setAlignment(Pos.CENTER);
 		buttonBox.setPadding(new Insets(10));
 
+		startButton.setOnAction(event -> startVideoCapture(primaryStage, "pro"));
 		inputButton.setOnAction(e -> openFileChooser(primaryStage, "pro"));
 		primaryStage.setScene(new Scene(buttonBox, 600, 400));
 	}
@@ -129,10 +131,10 @@ public class DanceInstructorUIController {
 	 * 
 	 * @see #stopVideoCapture()
 	 */
-	private void startVideoCapture(Stage stage) {
+	private void startVideoCapture(Stage stage, String videoType) {
 		new Thread(() -> {
 			ApplicationHandler handler = new ApplicationHandler();
-			handler.runCapturePoseEstimation();
+			handler.runCapturePoseEstimation(videoType);
 		}).start();
 	}
 

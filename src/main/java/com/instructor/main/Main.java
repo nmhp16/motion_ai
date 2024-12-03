@@ -56,7 +56,7 @@ public class Main {
             switch (option) {
                 case 1: // Capture user video
                     System.out.println("Starting video capture from Python...");
-                    if (handler.runCapturePoseEstimation()) {
+                    if (handler.runCapturePoseEstimation("beginner")) {
                         // Update user history
                         fileCleanup.updateSavedFilenamesFile();
 

@@ -220,10 +220,14 @@ public class DanceInstructorUIController {
 
 			feedbackTextArea.appendText("\n\n");
 
-			String prompt = poseScoring.generateComparisonPrompt(userKeypointsMap, proKeypointsMap,
-					userInput);
+			if (finalScore < 90) {
+				String prompt = poseScoring.generateComparisonPrompt(userKeypointsMap, proKeypointsMap,
+						userInput);
 
-			feedbackTextArea.appendText(handler.generateFeedbackAPI(prompt)); // Generate feedback
+				feedbackTextArea.appendText(handler.generateFeedbackAPI(prompt)); // Generate feedback
+			} else {
+				feedbackTextArea.appendText("No feedback needed.");
+			}
 
 			// Back button
 			Button backButton = new Button("Back");

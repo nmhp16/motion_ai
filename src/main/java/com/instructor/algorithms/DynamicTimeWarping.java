@@ -114,8 +114,8 @@ public class DynamicTimeWarping {
 
         List<Integer> userKeys = new ArrayList<>(userPartData.keySet());
         List<Integer> proKeys = new ArrayList<>(proPartData.keySet());
-        Collections.sort(userKeys);
-        Collections.sort(proKeys);
+        MergeSort.mergeSort(userKeys, true); // Sort in ascending order
+        MergeSort.mergeSort(proKeys, true); // Sort in ascending order
 
         int n = userKeys.size();
         int m = proKeys.size();

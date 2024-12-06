@@ -3,6 +3,8 @@ import mediapipe as mp
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import speech_recognition as sr
+import threading
 
 # Initialize MediaPipe Pose and Hands
 mp_pose = mp.solutions.pose
@@ -15,6 +17,7 @@ class PoseEstimationService:
         self.hands = mp_hands.Hands()
         self.keypoints_data = self.initialize_keypoints_data()
         self.frame_counter = 0
+        self.is_running = True  # Flag to control the loop
 
         # Load existing file names to avoid conflicts
         self.existing_filenames = self.load_existing_filenames()
@@ -81,7 +84,7 @@ class PoseEstimationService:
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         out = cv2.VideoWriter(self.video_file, fourcc, 20.0, (frame_width, frame_height))
 
-        while cap.isOpened():
+        while cap.isOpened() and self.is_running:
             ret, frame = cap.read()
             if not ret:
                 print("Failed to capture video")
@@ -199,10 +202,36 @@ class PoseEstimationService:
         is_opened = cap.isOpened()  # Check if the camera is opened successfully
         cap.release()  # Release the camera
         return is_opened  # Return whether the camera is available
+    
+    def listen_for_stop_command(self):
+        recognizer = sr.Recognizer()
+        microphone = sr.Microphone()
+
+        with microphone as source:
+            recognizer.adjust_for_ambient_noise(source)
+            while self.is_running:
+                try:
+                    audio = recognizer.listen(source, timeout=5)
+                    command = recognizer.recognize_google(audio).lower()
+                    if "stop" in command:
+                        self.is_running = False
+                        break
+                except sr.UnknownValueError:
+                    continue
+                except sr.WaitTimeoutError:
+                    continue
+                except sr.RequestError as e:
+                    print(f"Error: {e}")
+                    break
 
 if __name__ == "__main__":
     # Start the video capture in Python
     pose_service = PoseEstimationService()
+
+    # Start voice recognition in separate thread
+    voice_thread = threading.Thread(target=pose_service.listen_for_stop_command)
+    voice_thread.daemon = True
+    voice_thread.start()
 
     # Check if camera is available before starting video capture
     if pose_service.is_camera_available():

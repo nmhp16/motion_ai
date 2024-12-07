@@ -182,69 +182,88 @@ public class DanceInstructorUIController {
 	 * @param stage The stage to set the new scene on
 	 */
 	private void showFeedbackScreen(Stage stage, String userInput) {
-
 		// Show ProgressBar
 		showProgressBar(stage);
 
 		// Run processing in a separate thread
 		new Thread(() -> {
-
-			// Calculate similarity score between user and pro based on total distance
-			// difference
+			// Calculate similarity score
 			float similarityScore = DynamicTimeWarping.totalDtw(userKeypointsMap, proKeypointsMap);
-
-			// Assume max similarity and calculate total score
 			float maxSimilarity = 4.0f; // Replace with actual value
-
-			// DTW Score
 			int finalScore = poseScoring.calculateScore(similarityScore, maxSimilarity);
 
 			ApplicationHandler handler = new ApplicationHandler();
 
-			// Feedback screen layout
+			// Main layout for feedback
 			VBox feedbackLayout = new VBox(20);
-			feedbackLayout.setAlignment(Pos.TOP_LEFT);
 			feedbackLayout.setPadding(new Insets(20));
+			feedbackLayout.setAlignment(Pos.TOP_LEFT);
 
-			// Label for feedback
-			Label feedbackLabel = new Label("Feedback:");
-			TextArea feedbackTextArea = new TextArea();
-			feedbackTextArea.setEditable(false);
-			feedbackTextArea.setPrefSize(700, 600);
+			// Section: Final Score
+			Label scoreHeader = new Label("Final Score:");
+			scoreHeader.setFont(new Font("Georgia", 20));
+			scoreHeader.setStyle("-fx-font-weight: bold;");
 
-			feedbackTextArea.appendText("Final Score (out of 100): " + finalScore);
+			Label scoreLabel = new Label(finalScore + " / 100");
+			scoreLabel.setFont(new Font("Georgia", 24));
 
-			feedbackTextArea.appendText("\n\n");
+			// Set color based on score
+			if (finalScore >= 90) {
+				scoreLabel.setStyle(scoreLabel.getStyle() + " -fx-text-fill: green;");
+			} else if (finalScore >= 70) {
+				scoreLabel
+						.setStyle(scoreLabel.getStyle() + " -fx-text-fill: orange;");
+			} else {
+				scoreLabel.setStyle(scoreLabel.getStyle() + " -fx-text-fill: red;");
+			}
 
-			feedbackTextArea.appendText(poseFeedback.provideFeedback(finalScore));
+			// Section: General Feedback
+			Label generalFeedbackHeader = new Label("General Feedback:");
+			generalFeedbackHeader.setFont(new Font("Georgia", 20));
+			generalFeedbackHeader.setStyle("-fx-font-weight: bold;");
 
-			feedbackTextArea.appendText("\n\n");
+			Label generalFeedbackLabel = new Label(poseFeedback.provideFeedback(finalScore));
+			generalFeedbackLabel.setFont(new Font("Georgia", 14));
+			generalFeedbackLabel.setWrapText(true);
+
+			// Section: Detailed Feedback
+			Label detailedFeedbackHeader = new Label("Detailed Feedback:");
+			detailedFeedbackHeader.setFont(new Font("Georgia", 20));
+			detailedFeedbackHeader.setStyle("-fx-font-weight: bold;");
+
+			TextArea detailedFeedbackTextArea = new TextArea();
+			detailedFeedbackTextArea.setEditable(false);
+			detailedFeedbackTextArea.setWrapText(true);
+			detailedFeedbackTextArea.setFont(new Font("Georgia", 14));
+			detailedFeedbackTextArea.setPrefHeight(600);
 
 			if (finalScore < 90) {
-				String prompt = poseScoring.generateComparisonPrompt(userKeypointsMap, proKeypointsMap,
-						userInput);
-
-				feedbackTextArea.appendText(handler.generateFeedbackAPI(prompt)); // Generate feedback
+				String prompt = poseScoring.generateComparisonPrompt(userKeypointsMap, proKeypointsMap, userInput);
+				detailedFeedbackTextArea.setText(handler.generateFeedbackAPI(prompt));
 			} else {
-				feedbackTextArea.appendText("No feedback needed.");
+				detailedFeedbackTextArea.setText("No additional feedback needed. Great job!");
 			}
 
 			// Back button
 			Button backButton = new Button("Back");
-
-			// Displays main scene
 			backButton.setOnAction(e -> {
 				isPartChosen = false;
-
 				showMainScreen();
 			});
 
-			feedbackLayout.getChildren().addAll(backButton, feedbackLabel, feedbackTextArea);
+			// Add sections to the layout
+			feedbackLayout.getChildren().addAll(
+					scoreHeader, scoreLabel,
+					generalFeedbackHeader, generalFeedbackLabel,
+					detailedFeedbackHeader, detailedFeedbackTextArea,
+					backButton);
 
 			Scene feedbackScene = new Scene(feedbackLayout, 800, 700);
-			Platform.runLater(() -> stage.setScene(feedbackScene));
+			Platform.runLater(() -> {
+				stage.setScene(feedbackScene);
+				stage.centerOnScreen();
+			});
 		}).start();
-
 	}
 
 	/**
@@ -262,6 +281,7 @@ public class DanceInstructorUIController {
 		loadingLayout.setAlignment(Pos.CENTER);
 		Scene loadingScene = new Scene(loadingLayout, 800, 700);
 		stage.setScene(loadingScene);
+		stage.centerOnScreen();
 	}
 
 	/**

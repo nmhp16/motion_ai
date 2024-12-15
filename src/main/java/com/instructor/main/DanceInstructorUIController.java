@@ -1,5 +1,6 @@
 package com.instructor.main;
 
+import javafx.scene.paint.Color;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -41,8 +42,8 @@ public class DanceInstructorUIController {
 	public static Map<String, Map<Integer, float[]>> proKeypointsMap = new HashMap<>();
 	private PoseFeedback poseFeedback = new PoseFeedback();
 	private PoseScoring poseScoring = new PoseScoring();
-	public static boolean isUserInput = false;
-	public static boolean isProInput = false;
+	public static boolean isUserInput = true;
+	public static boolean isProInput = true;
 	private boolean isPartChosen = false;
 
 	public DanceInstructorUIController(Stage primaryStage, Button startButton, Button inputButton, Button doneButton,
@@ -100,6 +101,7 @@ public class DanceInstructorUIController {
 		HBox buttonBox = new HBox(10, startButton, inputButton, backButton);
 		buttonBox.setAlignment(Pos.CENTER);
 		buttonBox.setPadding(new Insets(10));
+		buttonBox.setStyle("-fx-background-color: #2B2B2B;");
 
 		startButton.setOnAction(event -> startVideoCapture(primaryStage, "beginner"));
 		inputButton.setOnAction(e -> openFileChooser(primaryStage, "beginner"));
@@ -119,6 +121,7 @@ public class DanceInstructorUIController {
 		HBox buttonBox = new HBox(10, startButton, inputButton, backButton);
 		buttonBox.setAlignment(Pos.CENTER);
 		buttonBox.setPadding(new Insets(10));
+		buttonBox.setStyle("-fx-background-color: #2B2B2B;");
 
 		startButton.setOnAction(event -> startVideoCapture(primaryStage, "pro"));
 		inputButton.setOnAction(e -> openFileChooser(primaryStage, "pro"));
@@ -198,11 +201,13 @@ public class DanceInstructorUIController {
 			VBox feedbackLayout = new VBox(20);
 			feedbackLayout.setPadding(new Insets(20));
 			feedbackLayout.setAlignment(Pos.TOP_LEFT);
+			feedbackLayout.setStyle("-fx-background-color: #2B2B2B;");
 
 			// Section: Final Score
 			Label scoreHeader = new Label("Final Score:");
 			scoreHeader.setFont(new Font("Georgia", 20));
 			scoreHeader.setStyle("-fx-font-weight: bold;");
+			scoreHeader.setTextFill(Color.WHITE);
 
 			Label scoreLabel = new Label(finalScore + " / 100");
 			scoreLabel.setFont(new Font("Georgia", 24));
@@ -212,7 +217,7 @@ public class DanceInstructorUIController {
 				scoreLabel.setStyle(scoreLabel.getStyle() + " -fx-text-fill: green;");
 			} else if (finalScore >= 70) {
 				scoreLabel
-						.setStyle(scoreLabel.getStyle() + " -fx-text-fill: orange;");
+						.setStyle(scoreLabel.getStyle() + " -fx-text-fill: yellow;");
 			} else {
 				scoreLabel.setStyle(scoreLabel.getStyle() + " -fx-text-fill: red;");
 			}
@@ -221,15 +226,18 @@ public class DanceInstructorUIController {
 			Label generalFeedbackHeader = new Label("General Feedback:");
 			generalFeedbackHeader.setFont(new Font("Georgia", 20));
 			generalFeedbackHeader.setStyle("-fx-font-weight: bold;");
+			generalFeedbackHeader.setTextFill(Color.WHITE);
 
 			Label generalFeedbackLabel = new Label(poseFeedback.provideFeedback(finalScore));
-			generalFeedbackLabel.setFont(new Font("Georgia", 14));
+			generalFeedbackLabel.setFont(new Font("Georgia", 16));
 			generalFeedbackLabel.setWrapText(true);
+			generalFeedbackLabel.setTextFill(Color.WHITE);
 
 			// Section: Detailed Feedback
 			Label detailedFeedbackHeader = new Label("Detailed Feedback:");
 			detailedFeedbackHeader.setFont(new Font("Georgia", 20));
 			detailedFeedbackHeader.setStyle("-fx-font-weight: bold;");
+			detailedFeedbackHeader.setTextFill(Color.WHITE);
 
 			TextArea detailedFeedbackTextArea = new TextArea();
 			detailedFeedbackTextArea.setEditable(false);
@@ -246,6 +254,14 @@ public class DanceInstructorUIController {
 
 			// Back button
 			Button backButton = new Button("Back");
+			backButton.setPrefWidth(180);
+			backButton.setStyle(
+					"-fx-background-color: #3E3E3E; -fx-text-fill: white; -fx-font-family: 'Georgia';-fx-font-size: 20px;");
+			backButton.setOnMouseEntered(e -> backButton.setStyle(
+					"-fx-background-color: #5A5A5A; -fx-text-fill: lightgray; -fx-font-family: 'Georgia'; -fx-font-size: 20px;"));
+			backButton.setOnMouseExited(e -> backButton.setStyle(
+					"-fx-background-color: #3E3E3E; -fx-text-fill: white; -fx-font-family: 'Georgia'; -fx-font-size: 20px;"));
+
 			backButton.setOnAction(e -> {
 				isPartChosen = false;
 				showMainScreen();
@@ -275,10 +291,24 @@ public class DanceInstructorUIController {
 		// Show loading screen with progress bar
 		ProgressBar progressBar = new ProgressBar();
 		progressBar.setPrefWidth(300);
+
+		progressBar.setStyle(
+				"-fx-accent: #4A90E2;" + // Bar color
+						"-fx-background-color: #3E3E3E;" + // Background color
+						"-fx-background-radius: 10px;" + // Rounded corners for the background
+						"-fx-border-color: #1F1F1F;" + // Border color
+						"-fx-border-width: 2px;" + // Border width
+						"-fx-border-radius: 10px;" // Rounded corners for the border
+		);
+
 		Label loadingLabel = new Label("Loading, please wait...");
 		loadingLabel.setFont(new Font("Georgia", 20));
+		loadingLabel.setTextFill(Color.WHITE);
+
 		VBox loadingLayout = new VBox(20, loadingLabel, progressBar);
 		loadingLayout.setAlignment(Pos.CENTER);
+		loadingLayout.setStyle("-fx-background-color: #2B2B2B;");
+
 		Scene loadingScene = new Scene(loadingLayout, 800, 700);
 		stage.setScene(loadingScene);
 		stage.centerOnScreen();
@@ -326,19 +356,30 @@ public class DanceInstructorUIController {
 		VBox optionLayout = new VBox(15);
 		optionLayout.setAlignment(Pos.CENTER);
 		optionLayout.setPadding(new Insets(20)); // Add padding for cleaner spacing
+		optionLayout.setStyle("-fx-background-color: #2B2B2B;");
 
 		// Style the available options label to improve readability
 		Label availableOptionsLabel = new Label("Available body parts:");
 		availableOptionsLabel.setFont(new Font("Georgia", 20));
+		availableOptionsLabel.setTextFill(Color.WHITE);
 
 		// List body parts in a scrollable area for better user experience
 		ListView<String> bodyPartsListView = new ListView<>();
 		bodyPartsListView.getItems().addAll(validBodyParts);
 		bodyPartsListView.setPrefHeight(150); // Set height to make it scrollable if necessary
 
+		// Add a custom style to match the layout
+		bodyPartsListView.setStyle(
+				"-fx-background-color: #3E3E3E; " +
+						"-fx-text-fill: white; " +
+						"-fx-border-color: #5A5A5A; " +
+						"-fx-font-family: 'Georgia'; " +
+						"-fx-font-size: 16px;");
+
 		// Label for the text input prompt
 		Label label = new Label("Enter body part:");
 		label.setFont(new Font("Georgia", 20));
+		label.setTextFill(Color.WHITE);
 
 		// TextField for user input with styling
 		TextField textField = new TextField();
@@ -347,7 +388,12 @@ public class DanceInstructorUIController {
 
 		// Submit button with styling
 		Button button = new Button("Submit");
-		button.setFont(new Font("Georgia", 16));
+		button.setStyle(
+				"-fx-background-color: #3E3E3E; -fx-text-fill: white; -fx-font-family: 'Georgia';-fx-font-size: 20px;");
+		button.setOnMouseEntered(e -> button.setStyle(
+				"-fx-background-color: #5A5A5A; -fx-text-fill: lightgray; -fx-font-family: 'Georgia'; -fx-font-size: 20px;"));
+		button.setOnMouseExited(e -> button.setStyle(
+				"-fx-background-color: #3E3E3E; -fx-text-fill: white; -fx-font-family: 'Georgia'; -fx-font-size: 20px;"));
 
 		// Select body part on double click
 		bodyPartsListView.setOnMouseClicked(event -> {

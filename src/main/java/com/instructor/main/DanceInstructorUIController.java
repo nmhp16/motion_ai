@@ -42,8 +42,8 @@ public class DanceInstructorUIController {
 	public static Map<String, Map<Integer, float[]>> proKeypointsMap = new HashMap<>();
 	private PoseFeedback poseFeedback = new PoseFeedback();
 	private PoseScoring poseScoring = new PoseScoring();
-	public static boolean isUserInput = true;
-	public static boolean isProInput = true;
+	public static boolean isUserInput = false;
+	public static boolean isProInput = false;
 	private boolean isPartChosen = false;
 
 	public DanceInstructorUIController(Stage primaryStage, Button startButton, Button inputButton, Button doneButton,

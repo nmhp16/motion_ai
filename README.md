@@ -1,4 +1,4 @@
-# AI Dance Instructor
+# Motion AI
 
 ## **Usage Instructions**
 - Use (`motion_database`) to collect pro dancer data by adding a video file and run (`PoseDetection.py`).

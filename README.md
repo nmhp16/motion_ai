@@ -9,7 +9,7 @@ Motion AI is a project designed to help users improve their dance skills by anal
 - **Dynamic Time Warping (DTW)**: Measures similarity between sequences with varying time/speed, aligning user and professional movements.  
 - **Normalization**: Scales body points relative to torso length, enabling consistent pose comparison across different body sizes.  
 - **Linear Interpolation**: Fills gaps in key point data caused by detection issues like motion blur or occlusions.  
-- **Moving Average**: Smooths data fluctuations, filtering noise for improved accuracy in analysis.  
+- **Moving Average**: Smooth data fluctuations, filtering noise for improved accuracy in analysis.  
 
 ## Installation
 
@@ -40,7 +40,7 @@ mvn javafx:run
 ## Methodology  
 
 ### 1. **MediaPipe Integration**  
-MediaPipe is at the core of our pose estimation pipeline, providing robust and real-time detection of 33 key body points in 3D space (x, y, z) for each frame of the video.  
+MediaPipe is the core of our pose estimation pipeline, providing robust, real-time detection of 33 key body points in 3D space (x, y, z) for each frame of the video.  
 - **Pose Detection**: Tracks keypoints such as shoulders, hips, elbows, and knees, ensuring accurate representation of user movements.  
 - **Advantages**:  
   - Real-time processing for seamless feedback.  
@@ -49,8 +49,8 @@ MediaPipe is at the core of our pose estimation pipeline, providing robust and r
 ### 2. **Dynamic Time Warping (DTW)**  
 DTW aligns sequences of body movements from users and professionals for accurate comparisons.  
 - **Input Data**: Body keypoints detected by MediaPipe are stored in maps with frame numbers as keys and coordinates as values.  
-- **Sorting**: Merge Sort is used to organize frames for comparison. Small sublists are handled with Insertion Sort for efficiency.  
-- **Distance Calculation**: DTW quantifies differences in movements for each body part.  
+- **Sorting**: Merge Sort organizes frames for comparison. Small sublists are handled with Insertion Sort for efficiency.  
+- **Distance Calculation**: DTW quantifies movement differences for each body part.  
 
 ### 3. **Normalization**  
 Addresses body size differences to allow fair comparisons.  
@@ -64,7 +64,7 @@ Fills gaps in keypoint data to ensure complete movement sequences.
 - **Example**: If a keypoint is missing at frame 6, it is estimated using the known keypoints at frames 5 and 7.  
 
 ### 5. **Moving Average**  
-Smooths data fluctuations and filters out noise for improved accuracy.  
+Smooth data fluctuations and filter out noise for improved accuracy.  
 - **Concept**: Averages keypoint values over a specific time window to eliminate short-term variations.  
 - **Example**: Reduces erratic hand movement data caused by tracking inaccuracies, creating a smoother trajectory.  
 

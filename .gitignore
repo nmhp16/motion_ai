@@ -41,3 +41,5 @@ Thumbs.db          # Windows
 
 # Ignore text files
 *.txt
+
+.env

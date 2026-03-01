@@ -209,23 +209,12 @@ public class ApplicationHandler {
                         }
 
                         int exitCode = process.waitFor();
-                        String response = feedback.toString().trim();
-
                         if (exitCode != 0) {
-                                System.err.println("AI Script Error (" + exitCode + "): " + response);
-                                return "AI Error: " + response;
+                                System.err.println("Feedback script exited with error code: " + exitCode);
+                                System.err.println("Feedback output was: " + feedback.toString());
                         }
 
-                        if (response.isEmpty()) {
-                                System.out.println("AI returned an empty response.");
-                                return "No feedback received from AI. Try selecting another body part.";
-                        }
-
-                        // Debug: Print preview of feedback to console
-                        System.out.println("AI Feedback Received (" + response.length() + " chars): "
-                                        + (response.length() > 50 ? response.substring(0, 50) + "..." : response));
-
-                        return response;
+                        return feedback.toString();
 
                 } catch (Exception e) {
                         e.printStackTrace();

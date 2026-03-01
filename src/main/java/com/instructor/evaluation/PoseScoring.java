@@ -61,7 +61,7 @@ public class PoseScoring {
 
 			// Track overall score based on DTW distance
 			float totalDtwDistance = 0;
-			float maxDistance = 4.0f; // Replace actual value later
+			float maxDistance = 1.5f; // Used to be 4.0f
 
 			for (int[] path : alignmentPath) {
 				int userFrame = path[0];
@@ -213,9 +213,9 @@ public class PoseScoring {
 				float frameDtwDistance = DynamicTimeWarping.dtw(
 						Map.of(0, userPartData.get(userFrame)),
 						Map.of(0, proPartData.get(proFrame)));
-				int score = calculateScore(frameDtwDistance, 4.0f); // Max distance of 4.0f (adjust if needed)
+				int score = calculateScore(frameDtwDistance, 1.5f); // Used to be 4.0f, which was too forgiving
 
-				// Only append to the prompt if the score is below 80
+				// Only append to the prompt if the score is below THRESHOLD_SCORE
 				if (score < THRESHOLD_SCORE) {
 					if (prompt.length() == 0) {
 						prompt.append("Body Part: ").append(bodyPart).append("\n");

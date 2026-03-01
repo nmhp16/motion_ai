@@ -82,7 +82,7 @@ public class Main {
                     }
 
                     // Allow user to upload video to be compared
-                    handler.runUploadPoseEstimation(userFile, "Beginner");
+                    handler.runAWSPoseEstimation(userFile, "Beginner");
 
                     // Update user history
                     fileCleanup.updateSavedFilenamesFile();

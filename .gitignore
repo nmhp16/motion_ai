@@ -42,4 +42,22 @@ Thumbs.db          # Windows
 # Ignore text files
 *.txt
 
-.env
+# Multi-language/Project ignore
+.env*
+last_saved_filename.txt
+
+# Python environments
+venv/
+conda_env/
+env/
+.venv/
+.env/
+__pycache__/
+*.pyc
+
+# IDE hidden items
+.DS_Store
+.metadata/
+*.bak
+*.tmp
+*.temp

@@ -192,7 +192,7 @@ public class DanceInstructorUIController {
 		new Thread(() -> {
 			// Calculate similarity score
 			float similarityScore = DynamicTimeWarping.totalDtw(userKeypointsMap, proKeypointsMap);
-			float maxSimilarity = 4.0f; // Replace with actual value
+			float maxSimilarity = 1.5f; // Was 4.0f, but generated artificially high scores
 			int finalScore = poseScoring.calculateScore(similarityScore, maxSimilarity);
 
 			ApplicationHandler handler = new ApplicationHandler();

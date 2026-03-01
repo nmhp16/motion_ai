@@ -12,8 +12,9 @@ public class PoseScoring {
 	private int score = 0;
 	private int overallScore = 0;
 
-	// Threshold for considering a pose as "wrong"
-	private static final int THRESHOLD_SCORE = 70;
+	// Threshold for considering a pose as "needs improvement" for detailed AI
+	// feedback
+	private static final int THRESHOLD_SCORE = 80;
 
 	/**
 	 * Give score based on the similarity between User and Pro

@@ -75,21 +75,29 @@ class PoseEstimationService:
             "left_thumb_tip": [], "right_thumb_tip": []
         }
 
-    def start_video_capture(self):
-        cap = cv2.VideoCapture(0)
-        frame_width, frame_height = 1280, 720
+    def start_video_capture(self, video_source=0):
+        cap = cv2.VideoCapture(video_source)
+        if not cap.isOpened():
+             print(f"Error opening video source: {video_source}")
+             return
 
+        frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        
+        # If processing a file, we might not want to show the window to speed up
+        # but for debugging we'll keep it for now.
+        
         # Define the codec and create VideoWriter object
+        # If source is file, we'll save it as user_processed.avi or something
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        out = cv2.VideoWriter(self.video_file, fourcc, 20.0, (frame_width, frame_height))
+        out = cv2.VideoWriter(self.video_file, fourcc, 20.0, (1280, 720))
 
         while cap.isOpened() and self.is_running:
             ret, frame = cap.read()
             if not ret:
-                print("Failed to capture video")
                 break
-
-            frame = cv2.resize(frame, (frame_width, frame_height))
+            
+            frame = cv2.resize(frame, (1280, 720))
             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image.flags.writeable = False
 
@@ -118,18 +126,19 @@ class PoseEstimationService:
             # Write the frame to the output video file
             out.write(frame)
 
-            # Display the frame
-            cv2.imshow('Pose Estimation', frame)
-
-            if cv2.waitKey(5) & 0xFF == 27:  # Press 'ESC' to exit
-                break
+            # Display the frame - only if it's camera
+            if video_source == 0:
+                cv2.imshow('Pose Estimation', frame)
+                if cv2.waitKey(5) & 0xFF == 27:  # Press 'ESC' to exit
+                    break
 
             self.frame_counter += 1  # Increment the frame counter
 
         # Release resources
         cap.release()
         out.release()
-        cv2.destroyAllWindows()
+        if video_source == 0:
+            cv2.destroyAllWindows()
 
         self.save_keypoints_data()  # Save keypoints data to a text file
 
@@ -224,16 +233,24 @@ class PoseEstimationService:
                     break
 
 if __name__ == "__main__":
+    import sys
+    
     # Start the video capture in Python
     pose_service = PoseEstimationService()
 
-    # Start voice recognition in separate thread
-    voice_thread = threading.Thread(target=pose_service.listen_for_stop_command)
-    voice_thread.daemon = True
-    voice_thread.start()
-
-    # Check if camera is available before starting video capture
-    if pose_service.is_camera_available():
-        pose_service.start_video_capture()
+    # If the user provides a video file via command line argument, process it locally
+    if len(sys.argv) > 1:
+        video_path = sys.argv[1]
+        print(f"Processing local file: {video_path}")
+        pose_service.start_video_capture(video_path)
     else:
-        print("Camera not detected. Please connect a camera and try again.")
+        # Start voice recognition in separate thread (Live Camera only)
+        voice_thread = threading.Thread(target=pose_service.listen_for_stop_command)
+        voice_thread.daemon = True
+        voice_thread.start()
+
+        # Check if camera is available before starting video capture
+        if pose_service.is_camera_available():
+            pose_service.start_video_capture()
+        else:
+            print("Camera not detected. Please connect a camera and try again.")

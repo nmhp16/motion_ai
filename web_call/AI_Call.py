@@ -1,24 +1,50 @@
-from google import genai
 import sys
 import os
+from groq import Groq
 from dotenv import load_dotenv
 
-# Load API key from environment variable
-load_dotenv()
-api_key = os.getenv("GOOGLE_API_KEY")
+# Try to load from various potential .env locations
+load_dotenv(".env")
+load_dotenv(".env.local")
 
-# Configure the GenAI client with the API key
-client = genai.Client(api_key=api_key)
+# Load API key from environment variable
+api_key = os.getenv("GROQ_API_KEY")
 
 class AI_call:
     def __init__(self, prompt):
-        # Generate content
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=prompt)
-        # Print the response
-        print(response.text, flush=True)
+        if not api_key:
+            print("Error: GROQ_API_KEY not found in environment or .env files.")
+            return
+
+        if not prompt or prompt.strip() == "":
+            print("No significant posture differences detected. Great job!")
+            return
+
+        try:
+            # Initialize Groq client
+            client = Groq(api_key=api_key)
+            
+            # Generate completion
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    }
+                ],
+                model="llama-3.1-8b-instant",
+            )
+            
+            # Print the response
+            print(chat_completion.choices[0].message.content, flush=True)
+            
+        except Exception as e:
+            print(f"Error calling Groq API: {e}")
 
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Error: No prompt provided.")
+        sys.exit(1)
+        
     prompt = sys.argv[1]
     AI_call(prompt)

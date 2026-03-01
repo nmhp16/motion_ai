@@ -164,7 +164,7 @@ public class DanceInstructorUIController {
 			String fileName = selectedFile.getName();
 			if (fileName.endsWith(".mp4")) {
 				new Thread(() -> {
-					handler.runUploadPoseEstimation(selectedFile.getPath(), videoType);
+					handler.runAWSPoseEstimation(selectedFile.getPath(), videoType);
 				}).start();
 			} else {
 				System.out.println("The selected file is invalid. Please upload a .mp4 file.");
